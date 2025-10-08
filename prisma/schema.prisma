@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tasks         Task[]
+  teamMembers   TeamMember[]
+  createdTeams  Team[]       @relation("TeamCreator")
+}
+
+model Team {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  creatorId   String
+
+  creator     User         @relation("TeamCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  members     TeamMember[]
+  tasks       Task[]
+}
+
+model TeamMember {
+  id        String   @id @default(cuid())
+  role      String   @default("member") // "admin" or "member"
+  joinedAt  DateTime @default(now())
+  userId    String
+  teamId    String
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, teamId])
+}
+
+model Task {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  status      String   @default("todo") // "todo", "inprogress", "complete"
+  priority    String   @default("medium") // "low", "medium", "high"
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  userId      String
+  teamId      String
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  team        Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@index([teamId, status])
+}
