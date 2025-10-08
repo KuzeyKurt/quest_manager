@@ -23,6 +23,7 @@ interface Task {
   description: string | null
   priority: string
   status: string
+  assignee: string | null
 }
 
 interface TaskDialogProps {
@@ -37,6 +38,7 @@ export function TaskDialog({ open, onOpenChange, task, onSave }: TaskDialogProps
   const [description, setDescription] = useState("")
   const [priority, setPriority] = useState("medium")
   const [status, setStatus] = useState("todo")
+  const [assignee, setAssignee] = useState("")
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
@@ -50,6 +52,7 @@ export function TaskDialog({ open, onOpenChange, task, onSave }: TaskDialogProps
       setDescription("")
       setPriority("medium")
       setStatus("todo")
+      setAssignee("")
     }
   }, [task])
 
@@ -84,20 +87,20 @@ export function TaskDialog({ open, onOpenChange, task, onSave }: TaskDialogProps
         <form onSubmit={handleSubmit}>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="title">Title</Label>
+              <Label htmlFor="title">Название</Label>
               <Input
                 id="title"
-                placeholder="Task title"
+                placeholder="Название задачи"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description">Описание</Label>
               <Textarea
                 id="description"
-                placeholder="Task description (optional)"
+                placeholder="Описание задачи (опционально )"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={3}
@@ -105,15 +108,15 @@ export function TaskDialog({ open, onOpenChange, task, onSave }: TaskDialogProps
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="priority">Priority</Label>
+                <Label htmlFor="priority">Приоритет</Label>
                 <Select value={priority} onValueChange={setPriority}>
                   <SelectTrigger id="priority">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="low">Low</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="low">Низкий</SelectItem>
+                    <SelectItem value="medium">Средний</SelectItem>
+                    <SelectItem value="high">Высокий</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -130,6 +133,20 @@ export function TaskDialog({ open, onOpenChange, task, onSave }: TaskDialogProps
                   </SelectContent>
                 </Select>
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="assignee">Assignee</Label>
+                <Select value={assignee} onValueChange={setAssignee}>
+                  <SelectTrigger id="assignee">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Burak">Бурак Озчивит</SelectItem>
+                    <SelectItem value="Rayan">Райан Гослинг</SelectItem>
+                    <SelectItem value="Diana">Диана Азаматова</SelectItem>
+                    <SelectItem value="Safie">Сафие Короглу</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
           <DialogFooter>
@@ -137,7 +154,7 @@ export function TaskDialog({ open, onOpenChange, task, onSave }: TaskDialogProps
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? "Saving..." : task ? "Save changes" : "Create task"}
+              {loading ? "Сохранение..." : task ? "Сохранить изменения" : "Добавить задачу"}
             </Button>
           </DialogFooter>
         </form>
