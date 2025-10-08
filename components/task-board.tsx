@@ -134,7 +134,7 @@ export function TaskBoard({ teamId }: TaskBoardProps) {
   }
 
   const handleDeleteTask = async (taskId: string) => {
-    if (!confirm("Are you sure you want to delete this task?")) return
+    if (!confirm("Вы действительно хотите удалить эту задачу?")) return
 
     try {
       await fetch(`/api/tasks/${taskId}`, {
@@ -166,8 +166,8 @@ export function TaskBoard({ teamId }: TaskBoardProps) {
     }
   }
 
-  if (loading) {
-    return <div className="flex items-center justify-center h-96">Loading tasks...</div>
+  if (loading) {  
+    return <div className="flex items-center justify-center h-96">Загрузка задач...</div>
   }
 
   const todoTasks = tasks.filter((t) => t.status === "todo")
@@ -177,10 +177,10 @@ export function TaskBoard({ teamId }: TaskBoardProps) {
   return (
     <>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Task Board</h1>
+        <h1 className="text-2xl font-bold">Доска задач</h1>
         <Button onClick={handleCreateTask}>
           <Plus className="h-4 w-4 mr-2" />
-          New Task
+          Новая задача
         </Button>
       </div>
 

@@ -97,29 +97,29 @@ export function DashboardClient({ user }: { user: User }) {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-3xl font-bold mb-2">Your Teams</h1>
-              <p className="text-muted-foreground">Manage your teams and collaborate on tasks</p>
+              <h1 className="text-3xl font-bold mb-2">Ваши проекты</h1>
+              <p className="text-muted-foreground">Управляйте вашими проектами и работайте вместе с командой над задачами</p>
             </div>
             <Button onClick={() => setDialogOpen(true)}>
               <Plus className="h-4 w-4 mr-2" />
-              Create Team
+              Добавить проект
             </Button>
           </div>
 
           {loading ? (
             <div className="flex items-center justify-center h-64">
-              <p className="text-muted-foreground">Loading teams...</p>
+              <p className="text-muted-foreground">Загрузка проектов...</p>
             </div>
           ) : teams.length === 0 ? (
             <Card>
               <CardHeader>
                 <CardTitle>No teams yet</CardTitle>
-                <CardDescription>Create your first team to start managing tasks</CardDescription>
+                <CardDescription>Добавьте ваш первый проект, чтобы управлять его задачами</CardDescription>
               </CardHeader>
               <CardContent>
                 <Button onClick={() => setDialogOpen(true)}>
                   <Plus className="h-4 w-4 mr-2" />
-                  Create your first team
+                  Дбавьте ваш первый проект
                 </Button>
               </CardContent>
             </Card>

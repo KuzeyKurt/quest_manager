@@ -79,9 +79,9 @@ export function TaskDialog({ open, onOpenChange, task, onSave }: TaskDialogProps
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>{task ? "Edit Task" : "Create Task"}</DialogTitle>
+          <DialogTitle>{task ? "Редактировать задачу" : "Добавить задачу"}</DialogTitle>
           <DialogDescription>
-            {task ? "Make changes to your task here." : "Add a new task to your board."}
+            {task ? "Внесите изменения в свою задачу" : "Добавьте новую задачу в проект"}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
@@ -121,7 +121,7 @@ export function TaskDialog({ open, onOpenChange, task, onSave }: TaskDialogProps
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
+                <Label htmlFor="status">Статус</Label>
                 <Select value={status} onValueChange={setStatus}>
                   <SelectTrigger id="status">
                     <SelectValue />
@@ -134,7 +134,7 @@ export function TaskDialog({ open, onOpenChange, task, onSave }: TaskDialogProps
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="assignee">Assignee</Label>
+                <Label htmlFor="assignee">Назначен</Label>
                 <Select value={assignee} onValueChange={setAssignee}>
                   <SelectTrigger id="assignee">
                     <SelectValue />
@@ -151,7 +151,7 @@ export function TaskDialog({ open, onOpenChange, task, onSave }: TaskDialogProps
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+              Отмена
             </Button>
             <Button type="submit" disabled={loading}>
               {loading ? "Сохранение..." : task ? "Сохранить изменения" : "Добавить задачу"}

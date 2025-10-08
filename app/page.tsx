@@ -74,7 +74,7 @@ export default function HomePage() {
                   <div className="rounded-lg bg-primary/10 p-3">
                     <BarChart3 className="h-6 w-6 text-primary" />
                   </div>
-                  <h3 className="font-semibold">Analytics</h3>
+                  <h3 className="font-semibold">Аналитика</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
                     Gain insights with powerful analytics and progress tracking
                   </p>

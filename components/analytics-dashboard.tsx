@@ -81,15 +81,15 @@ export function AnalyticsDashboard({ teamId }: AnalyticsDashboardProps) {
   const completionRate = data.overview.total > 0 ? Math.round((data.overview.complete / data.overview.total) * 100) : 0
 
   const statusData = [
-    { name: "To Do", value: data.overview.todo, color: "hsl(var(--chart-1))" },
-    { name: "In Progress", value: data.overview.inProgress, color: "hsl(var(--chart-2))" },
-    { name: "Complete", value: data.overview.complete, color: "hsl(var(--chart-3))" },
+    { name: "To Do", value: data.overview.todo, color: "oklch(0.627 0.265 303.9)" },
+    { name: "In Progress", value: data.overview.inProgress, color: "oklch(0.398 0.07 227.392)" },
+    { name: "Complete", value: data.overview.complete, color: "oklch(0.696 0.17 162.48)" },
   ]
 
   const priorityData = [
-    { name: "High", value: data.priority.high, fill: "hsl(var(--chart-1))" },
-    { name: "Medium", value: data.priority.medium, fill: "hsl(var(--chart-4))" },
-    { name: "Low", value: data.priority.low, fill: "hsl(var(--chart-2))" },
+    { name: "High", value: data.priority.high, fill: "oklch(0.637 0.237 25.331)" },
+    { name: "Medium", value: data.priority.medium, fill: "oklch(0.769 0.188 70.08)" },
+    { name: "Low", value: data.priority.low, fill: "oklch(0.488 0.243 264.376)" },
   ]
 
   return (
@@ -97,45 +97,45 @@ export function AnalyticsDashboard({ teamId }: AnalyticsDashboardProps) {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Tasks</CardTitle>
+            <CardTitle className="text-sm font-medium">Всего задач</CardTitle>
             <ListTodo className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{data.overview.total}</div>
-            <p className="text-xs text-muted-foreground">Across all statuses</p>
+            <p className="text-xs text-muted-foreground">По всем статусам</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">In Progress</CardTitle>
+            <CardTitle className="text-sm font-medium">В процессе</CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{data.overview.inProgress}</div>
-            <p className="text-xs text-muted-foreground">Currently being worked on</p>
+            <p className="text-xs text-muted-foreground">Задач сейчас в работе</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Completed</CardTitle>
+            <CardTitle className="text-sm font-medium">Выполнено</CardTitle>
             <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{data.overview.complete}</div>
-            <p className="text-xs text-muted-foreground">Successfully finished</p>
+            <p className="text-xs text-muted-foreground">Успешно завершено</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Completion Rate</CardTitle>
+            <CardTitle className="text-sm font-medium">Статус завершения</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{completionRate}%</div>
-            <p className="text-xs text-muted-foreground">Of all tasks</p>
+            <p className="text-xs text-muted-foreground">Всех задач</p>
           </CardContent>
         </Card>
       </div>
@@ -143,15 +143,15 @@ export function AnalyticsDashboard({ teamId }: AnalyticsDashboardProps) {
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Task Status Distribution</CardTitle>
-            <CardDescription>Breakdown of tasks by current status</CardDescription>
+            <CardTitle>Статистика по задачам</CardTitle>
+            <CardDescription>Статистика задач по текущему статусуs</CardDescription>
           </CardHeader>
           <CardContent>
             <ChartContainer
               config={{
-                todo: { label: "To Do", color: "hsl(var(--chart-1))" },
-                inprogress: { label: "In Progress", color: "hsl(var(--chart-2))" },
-                complete: { label: "Complete", color: "hsl(var(--chart-3))" },
+                todo: { label: "To Do", color: "oklch(0.627 0.265 303.9)" },
+                inprogress: { label: "In Progress", color: "oklch(0.398 0.07 227.392)" },
+                complete: { label: "Complete", color: "oklch(0.696 0.17 162.48)" },
               }}
               className="h-[300px]"
             >
@@ -172,8 +172,8 @@ export function AnalyticsDashboard({ teamId }: AnalyticsDashboardProps) {
 
         <Card>
           <CardHeader>
-            <CardTitle>Priority Distribution</CardTitle>
-            <CardDescription>Tasks grouped by priority level</CardDescription>
+            <CardTitle>Стаистика приоритета</CardTitle>
+            <CardDescription>Группировка задач по приоритету</CardDescription>
           </CardHeader>
           <CardContent>
             <ChartContainer
@@ -199,8 +199,8 @@ export function AnalyticsDashboard({ teamId }: AnalyticsDashboardProps) {
 
         <Card>
           <CardHeader>
-            <CardTitle>Tasks Created (Last 7 Days)</CardTitle>
-            <CardDescription>Daily task creation trend</CardDescription>
+            <CardTitle>Добавлено задач за последние 7 дней</CardTitle>
+            <CardDescription>Тенденция создания задач по дням</CardDescription>
           </CardHeader>
           <CardContent>
             <ChartContainer
@@ -229,8 +229,8 @@ export function AnalyticsDashboard({ teamId }: AnalyticsDashboardProps) {
 
         <Card>
           <CardHeader>
-            <CardTitle>Tasks Completed (Last 7 Days)</CardTitle>
-            <CardDescription>Daily completion trend</CardDescription>
+            <CardTitle>Добавлено задач за последние 7 дней</CardTitle>
+            <CardDescription>Тенденция создания задач по дням</CardDescription>
           </CardHeader>
           <CardContent>
             <ChartContainer
@@ -260,14 +260,14 @@ export function AnalyticsDashboard({ teamId }: AnalyticsDashboardProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Team Member Performance</CardTitle>
-          <CardDescription>Task completion by team member</CardDescription>
+          <CardTitle>Эффективность работы членов команды</CardTitle>
+          <CardDescription>Выполнение задачи членом команды</CardDescription>
         </CardHeader>
         <CardContent>
           <ChartContainer
             config={{
-              total: { label: "Total Tasks", color: "hsl(var(--chart-1))" },
-              completed: { label: "Completed", color: "hsl(var(--chart-3))" },
+              total: { label: "Всего задач", color: "oklch(0.627 0.265 303.9)" },
+              completed: { label: "Completed", color: "oklch(0.696 0.17 162.48)" },
             }}
             className="h-[300px]"
           >
@@ -278,8 +278,8 @@ export function AnalyticsDashboard({ teamId }: AnalyticsDashboardProps) {
                 <YAxis />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Legend />
-                <Bar dataKey="total" fill="hsl(var(--chart-1))" name="Total Tasks" />
-                <Bar dataKey="completed" fill="hsl(var(--chart-3))" name="Completed" />
+                <Bar dataKey="total" fill="oklch(0.627 0.265 303.9)" name="Total Tasks" />
+                <Bar dataKey="completed" fill="oklch(0.696 0.17 162.48)" name="Completed" />
               </BarChart>
             </ResponsiveContainer>
           </ChartContainer>

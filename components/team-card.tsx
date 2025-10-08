@@ -36,7 +36,7 @@ export function TeamCard({ team, currentUserId }: TeamCardProps) {
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <CardTitle className="text-xl mb-1">{team.name}</CardTitle>
-            <CardDescription className="line-clamp-2">{team.description || "No description"}</CardDescription>
+            <CardDescription className="line-clamp-2">{team.description || "Описание отсутствует"}</CardDescription>
           </div>
           {isCreator && (
             <Badge variant="secondary" className="ml-2">
@@ -49,16 +49,16 @@ export function TeamCard({ team, currentUserId }: TeamCardProps) {
         <div className="flex items-center gap-4 text-sm text-muted-foreground">
           <div className="flex items-center gap-1">
             <Users className="h-4 w-4" />
-            <span>{team._count.members} members</span>
+            <span>{team._count.members} участников  </span>
           </div>
           <div className="flex items-center gap-1">
             <CheckSquare className="h-4 w-4" />
-            <span>{team._count.tasks} tasks</span>
+            <span>{team._count.tasks} задач</span>
           </div>
         </div>
         <Button className="w-full mt-4" onClick={() => router.push(`/teams/${team.id}`)}>
           <Settings className="h-4 w-4 mr-2" />
-          Open Team
+          Открыть проект
         </Button>
       </CardContent>
     </Card>

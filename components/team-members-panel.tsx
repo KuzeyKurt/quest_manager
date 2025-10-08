@@ -82,8 +82,8 @@ export function TeamMembersPanel({ team, isAdmin, currentUserId }: TeamMembersPa
       {isAdmin && (
         <Card>
           <CardHeader>
-            <CardTitle>Add Team Member</CardTitle>
-            <CardDescription>Invite a user to join your team by their email address</CardDescription>
+            <CardTitle>Добавить участника команды</CardTitle>
+            <CardDescription>Пригласите пользователя присоединиться к вашей команде по электронной почте</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleAddMember} className="space-y-4">
@@ -94,7 +94,7 @@ export function TeamMembersPanel({ team, isAdmin, currentUserId }: TeamMembersPa
               )}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="md:col-span-2 space-y-2">
-                  <Label htmlFor="email">Email Address</Label>
+                  <Label htmlFor="email">Электронная почта</Label>
                   <Input
                     id="email"
                     type="email"
@@ -105,21 +105,21 @@ export function TeamMembersPanel({ team, isAdmin, currentUserId }: TeamMembersPa
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="role">Role</Label>
+                  <Label htmlFor="role">Роль</Label>
                   <Select value={role} onValueChange={setRole}>
                     <SelectTrigger id="role">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="member">Member</SelectItem>
-                      <SelectItem value="admin">Admin</SelectItem>
+                      <SelectItem value="member">Участник</SelectItem>
+                      <SelectItem value="admin">Администратор</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
               <Button type="submit" disabled={loading}>
                 <UserPlus className="h-4 w-4 mr-2" />
-                {loading ? "Adding..." : "Add Member"}
+                {loading ? "Adding..." : "Добавить участника"}
               </Button>
             </form>
           </CardContent>
@@ -128,8 +128,8 @@ export function TeamMembersPanel({ team, isAdmin, currentUserId }: TeamMembersPa
 
       <Card>
         <CardHeader>
-          <CardTitle>Team Members ({team.members.length})</CardTitle>
-          <CardDescription>Manage your team members and their roles</CardDescription>
+          <CardTitle>Участники команды ({team.members.length})</CardTitle>
+          <CardDescription>Управляйте вашей командой и её ролями</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">

@@ -62,11 +62,11 @@ export function TeamPageClient({ team, currentUserId }: TeamPageClientProps) {
       <main className="container py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-6">
-            <TabsTrigger value="board">Task Board</TabsTrigger>
-            <TabsTrigger value="members">Members</TabsTrigger>
+            <TabsTrigger value="board">Доска задач</TabsTrigger>
+            <TabsTrigger value="members">Участники</TabsTrigger>
             <TabsTrigger value="analytics">
               <BarChart3 className="h-4 w-4 mr-2" />
-              Analytics
+              Аналитика
             </TabsTrigger>
           </TabsList>
 
