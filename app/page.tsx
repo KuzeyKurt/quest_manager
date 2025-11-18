@@ -5,69 +5,68 @@ import { CheckCircle2, Users, BarChart3, Layers } from "lucide-react"
 export default function HomePage() {
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center justify-between">
+      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 pl-20 pr-20">
+        <div className="container flex h-16 items-center justify-between pr-10">
           <div className="flex items-center gap-2">
             <Layers className="h-6 w-6" />
-            <span className="text-xl font-bold">TaskFlow</span>
+            <span className="text-xl mx-auto font-bold">TaskForce</span>
           </div>
           <div className="flex items-center gap-4">
             <Link href="/login">
-              <Button variant="ghost">Sign in</Button>
+              <Button variant="ghost">Войти</Button>
             </Link>
             <Link href="/register">
-              <Button>Get started</Button>
+              <Button>Начать</Button>
             </Link>
           </div>
         </div>
       </header>
 
       <main className="flex-1">
-        <section className="container py-24 md:py-32">
+        <section className="container py-24 md:py-32 mx-auto">
           <div className="mx-auto max-w-3xl text-center">
             <h1 className="text-4xl font-bold tracking-tight sm:text-6xl text-balance">
-              Manage tasks with your team, effortlessly
+              Управляйте задачами вместе со своей командой без усилий
             </h1>
             <p className="mt-6 text-lg leading-relaxed text-muted-foreground text-pretty">
-              A powerful task management platform that helps teams collaborate, track progress, and achieve their goals
-              with intuitive drag-and-drop boards and real-time analytics.
+              Мощная платформа для управления задачами, которая помогает командам сотрудничать, отслеживать прогресс и достигать своих целей с помощью интуитивно понятных досок с функцией перетаскивания и аналитики в реальном времени.
             </p>
             <div className="mt-10 flex items-center justify-center gap-4">
               <Link href="/register">
                 <Button size="lg" className="h-12 px-8">
-                  Start for free
+                  Начать бесплатно
                 </Button>
               </Link>
               <Link href="/login">
                 <Button size="lg" variant="outline" className="h-12 px-8 bg-transparent">
-                  Sign in
+                  Войти
                 </Button>
               </Link>
             </div>
           </div>
         </section>
 
-        <section className="border-t bg-muted/40 py-24">
+        <section className="border-t bg-muted/40 mx-auto py-24 mx-auto">
           <div className="container">
             <div className="mx-auto max-w-5xl">
-              <h2 className="text-center text-3xl font-bold mb-12">Everything you need to stay organized</h2>
+              <h2 className="text-center text-3xl font-bold mb-12">Все, что вам нужно, чтобы оставаться организованным</h2>
               <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
                 <div className="flex flex-col items-center text-center gap-3">
                   <div className="rounded-lg bg-primary/10 p-3">
                     <CheckCircle2 className="h-6 w-6 text-primary" />
                   </div>
-                  <h3 className="font-semibold">Task Management</h3>
+                  <h3 className="font-semibold">Управление задачами</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Create, organize, and track tasks with drag-and-drop simplicity
+                    Создавайте, организуйте и отслеживайте задачи с помощью простого перетаскивания
                   </p>
                 </div>
                 <div className="flex flex-col items-center text-center gap-3">
                   <div className="rounded-lg bg-primary/10 p-3">
                     <Users className="h-6 w-6 text-primary" />
                   </div>
-                  <h3 className="font-semibold">Team Collaboration</h3>
+                  <h3 className="font-semibold">Командное сотрудничество</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Work together seamlessly with team workspaces and permissions
+                    Эффективная совместная работа с использованием рабочих пространств и разрешений для команды
                   </p>
                 </div>
                 <div className="flex flex-col items-center text-center gap-3">
@@ -76,16 +75,16 @@ export default function HomePage() {
                   </div>
                   <h3 className="font-semibold">Аналитика</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Gain insights with powerful analytics and progress tracking
+                    Получайте информацию с помощью мощной аналитики и отслеживания прогресса
                   </p>
                 </div>
                 <div className="flex flex-col items-center text-center gap-3">
                   <div className="rounded-lg bg-primary/10 p-3">
                     <Layers className="h-6 w-6 text-primary" />
                   </div>
-                  <h3 className="font-semibold">Kanban Boards</h3>
+                  <h3 className="font-semibold">Канбан доски</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Visualize workflow with customizable kanban-style boards
+                    Визуализируйте рабочий процесс с помощью настраиваемых досок в стиле канбан
                   </p>
                 </div>
               </div>
@@ -94,9 +93,9 @@ export default function HomePage() {
         </section>
       </main>
 
-      <footer className="border-t py-8">
+      <footer className="border-t py-8 mx-auto">
         <div className="container text-center text-sm text-muted-foreground">
-          <p>&copy; 2025 TaskFlow. All rights reserved.</p>
+          <p>&copy; 2025 TaskForce. Все права защищены.</p>
         </div>
       </footer>
     </div>

@@ -40,11 +40,11 @@ export function TeamPageClient({ team, currentUserId }: TeamPageClientProps) {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState("board")
 
-  const isAdmin = team.members.find((m) => m.userId === currentUserId)?.role === "admin"
+  const isAdmin = team.members.find((m) => m.user.id === currentUserId)?.role === "admin"
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b">
+      <header className="border-b pl-20 pr-20">
         <div className="container flex h-16 items-center gap-4">
           <Link href="/dashboard">
             <Button variant="ghost" size="sm">
@@ -59,7 +59,7 @@ export function TeamPageClient({ team, currentUserId }: TeamPageClientProps) {
         </div>
       </header>
 
-      <main className="container py-8">
+      <main className="container mx-auto py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-6">
             <TabsTrigger value="board">Доска задач</TabsTrigger>

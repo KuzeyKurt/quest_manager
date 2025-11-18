@@ -35,7 +35,7 @@ model Team {
 
 model TeamMember {
   id        String   @id @default(cuid())
-  role      String   @default("member") // "admin" or "member"
+  role      String   @default("member")
   joinedAt  DateTime @default(now())
   userId    String
   teamId    String
@@ -43,24 +43,29 @@ model TeamMember {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
 
+  assignedTasks Task[] @relation("AssignedTasks")
+
   @@unique([userId, teamId])
 }
 
 model Task {
-  id          String   @id @default(cuid())
+  id          String      @id @default(cuid())
   title       String
   description String?
-  status      String   @default("todo") // "todo", "inprogress", "complete"
-  priority    String   @default("medium") // "low", "medium", "high"
-  assignee    String   @defualt("Сафие Короглу") // на кого поставлена задача
-  order       Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  status      String      @default("todo")
+  priority    String      @default("medium")
+  order       Int         @default(0)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
   userId      String
   teamId      String
+  
+  assigneeId  String?
+  assignee    TeamMember? @relation("AssignedTasks", fields: [assigneeId], references: [id])
 
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  team        Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  team        Team        @relation(fields: [teamId], references: [id], onDelete: Cascade)
 
   @@index([teamId, status])
 }

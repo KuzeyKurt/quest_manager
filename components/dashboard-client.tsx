@@ -77,23 +77,25 @@ export function DashboardClient({ user }: { user: User }) {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b">
+      <header className="border-b pl-20 pr-20">
         <div className="container flex h-16 items-center justify-between">
           <div className="flex items-center gap-2">
             <Users className="h-6 w-6" />
-            <span className="text-xl font-bold">TaskFlow</span>
+            <span className="text-xl  font-bold">TaskForce</span>
           </div>
           <div className="flex items-center gap-4">
-            <span className="text-sm text-muted-foreground">{user.name}</span>
+            <span className="text-sm text-muted-foreground"
+            onClick={() => router.push("/profile")}
+            >{user.name}</span>
             <Button variant="ghost" size="sm" onClick={handleLogout}>
               <LogOut className="h-4 w-4 mr-2" />
-              Logout
+              Выйти
             </Button>
           </div>
         </div>
       </header>
 
-      <main className="container py-8">
+      <main className="container mx-auto py-8">
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
             <div>

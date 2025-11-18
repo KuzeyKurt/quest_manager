@@ -47,13 +47,13 @@ export function TeamDialog({ open, onOpenChange, onSave }: TeamDialogProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Create Team</DialogTitle>
-          <DialogDescription>Create a new team to collaborate with others on tasks.</DialogDescription>
+          <DialogTitle>Добавить проект</DialogTitle>
+          <DialogDescription>Добавить проект, чтобы работать с другими участниками команды</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Team Name</Label>
+              <Label htmlFor="name">Название проекта</Label>
               <Input
                 id="name"
                 placeholder="Engineering Team"
@@ -63,10 +63,10 @@ export function TeamDialog({ open, onOpenChange, onSave }: TeamDialogProps) {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description">Описание</Label>
               <Textarea
                 id="description"
-                placeholder="Team description (optional)"
+                placeholder="Описание проекта (опционально)"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={3}
@@ -78,7 +78,7 @@ export function TeamDialog({ open, onOpenChange, onSave }: TeamDialogProps) {
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? "Creating..." : "Create team"}
+              {loading ? "Добавление..." : "Добавить проект"}
             </Button>
           </DialogFooter>
         </form>
