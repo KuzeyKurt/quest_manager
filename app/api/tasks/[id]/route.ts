@@ -12,6 +12,11 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const { id } = await params
     const body = await request.json()
 
+    // Convert empty string assigneeId to null
+    if (body.assigneeId === "") {
+      body.assigneeId = null
+    }
+
     const task = await prisma.task.update({
       where: { id },
       data: body,
@@ -21,6 +26,17 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
             id: true,
             name: true,
             email: true,
+          },
+        },
+        assignee: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
           },
         },
       },

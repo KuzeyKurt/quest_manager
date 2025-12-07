@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,7 +34,12 @@ export default function ProfileClient({ user }: { user: any }) {
 
   return (
     <div className="p-10 max-w-xl mx-auto space-y-6">
-      <h1 className="text-3xl font-bold">Профиль</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold">Профиль</h1>
+        <Link href="/dashboard">
+          <Button variant="outline">← Назад</Button>
+        </Link>
+      </div>
 
       <div className="p-4 border rounded-lg space-y-2">
         <p><b>Email:</b> {user.email}</p>

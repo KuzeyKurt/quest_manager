@@ -17,13 +17,30 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
+interface TeamMember {
+  id: string
+  user: {
+    id: string
+    name: string
+    email: string
+  }
+}
+
 interface Task {
   id: string
   title: string
   description: string | null
   priority: string
   status: string
-  assignee: string | null
+  assigneeId: string | null
+  assignee?: {
+    id: string
+    user: {
+      id: string
+      name: string
+      email: string
+    }
+  } | null
 }
 
 interface TaskDialogProps {
@@ -31,15 +48,24 @@ interface TaskDialogProps {
   onOpenChange: (open: boolean) => void
   task: Task | null
   onSave: (data: Partial<Task>) => Promise<void>
+  teamId: string
 }
 
-export function TaskDialog({ open, onOpenChange, task, onSave }: TaskDialogProps) {
+export function TaskDialog({ open, onOpenChange, task, onSave, teamId }: TaskDialogProps) {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [priority, setPriority] = useState("medium")
   const [status, setStatus] = useState("todo")
-  const [assignee, setAssignee] = useState("")
+  const [assigneeId, setAssigneeId] = useState("")
   const [loading, setLoading] = useState(false)
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
+  const [loadingMembers, setLoadingMembers] = useState(false)
+
+  useEffect(() => {
+    if (open && teamId) {
+      fetchTeamMembers()
+    }
+  }, [open, teamId])
 
   useEffect(() => {
     if (task) {
@@ -47,14 +73,30 @@ export function TaskDialog({ open, onOpenChange, task, onSave }: TaskDialogProps
       setDescription(task.description || "")
       setPriority(task.priority)
       setStatus(task.status)
+      setAssigneeId(task.assigneeId || "none")
     } else {
       setTitle("")
       setDescription("")
       setPriority("medium")
       setStatus("todo")
-      setAssignee("")
+      setAssigneeId("none")
     }
   }, [task])
+
+  const fetchTeamMembers = async () => {
+    setLoadingMembers(true)
+    try {
+      const res = await fetch(`/api/teams/${teamId}/members`)
+      const data = await res.json()
+      if (res.ok) {
+        setTeamMembers(data.members || [])
+      }
+    } catch (error) {
+      console.error("[v0] Fetch team members error:", error)
+    } finally {
+      setLoadingMembers(false)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -66,6 +108,7 @@ export function TaskDialog({ open, onOpenChange, task, onSave }: TaskDialogProps
         description: description || null,
         priority,
         status,
+        assigneeId: assigneeId === "none" ? null : assigneeId,
       })
       onOpenChange(false)
     } catch (error) {
@@ -100,7 +143,7 @@ export function TaskDialog({ open, onOpenChange, task, onSave }: TaskDialogProps
               <Label htmlFor="description">Описание</Label>
               <Textarea
                 id="description"
-                placeholder="Описание задачи (опционально )"
+                placeholder="Описание задачи (опционально)"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={3}
@@ -133,20 +176,22 @@ export function TaskDialog({ open, onOpenChange, task, onSave }: TaskDialogProps
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="assignee">Назначен</Label>
-                <Select value={assignee} onValueChange={setAssignee}>
-                  <SelectTrigger id="assignee">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Burak">Бурак Озчивит</SelectItem>
-                    <SelectItem value="Rayan">Райан Гослинг</SelectItem>
-                    <SelectItem value="Diana">Диана Азаматова</SelectItem>
-                    <SelectItem value="Safie">Сафие Короглу</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="assignee">Назначен</Label>
+              <Select value={assigneeId} onValueChange={setAssigneeId} disabled={loadingMembers}>
+                <SelectTrigger id="assignee">
+                  <SelectValue placeholder={loadingMembers ? "Загрузка..." : "Выберите участника"} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Не назначен</SelectItem>
+                  {teamMembers.map((member) => (
+                    <SelectItem key={member.id} value={member.id}>
+                      {member.user.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <DialogFooter>

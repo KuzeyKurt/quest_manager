@@ -26,6 +26,17 @@ export async function GET(request: NextRequest) {
             email: true,
           },
         },
+        assignee: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
+          },
+        },
       },
       orderBy: { order: "asc" },
     })
@@ -44,7 +55,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { title, description, teamId, priority, status } = await request.json()
+    const { title, description, teamId, priority, status, assigneeId } = await request.json()
 
     if (!title || !teamId) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
@@ -65,6 +76,7 @@ export async function POST(request: NextRequest) {
         priority: priority || "medium",
         status: status || "todo",
         order: lastTask ? lastTask.order + 1 : 0,
+        assigneeId: assigneeId || null,
       },
       include: {
         user: {
@@ -72,6 +84,17 @@ export async function POST(request: NextRequest) {
             id: true,
             name: true,
             email: true,
+          },
+        },
+        assignee: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
           },
         },
       },

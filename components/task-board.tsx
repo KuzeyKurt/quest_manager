@@ -24,11 +24,20 @@ interface Task {
   priority: string
   status: string
   order: number
+  assigneeId: string | null
   user: {
     id: string
     name: string
     email: string
   }
+  assignee?: {
+    id: string
+    user: {
+      id: string
+      name: string
+      email: string
+    }
+  } | null
 }
 
 interface TaskBoardProps {
@@ -214,7 +223,7 @@ export function TaskBoard({ teamId }: TaskBoardProps) {
         </DragOverlay>
       </DndContext>
 
-      <TaskDialog open={dialogOpen} onOpenChange={setDialogOpen} task={editingTask} onSave={handleSaveTask} />
+      <TaskDialog open={dialogOpen} onOpenChange={setDialogOpen} task={editingTask} onSave={handleSaveTask} teamId={teamId} />
     </>
   )
 }
