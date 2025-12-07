@@ -4,19 +4,19 @@ declare global {
   namespace Cypress {
     interface Chainable {
       /**
-       * Custom command to login a user
+       * Кастомная команда для входа юзера
        * @example cy.login('user@example.com', 'password123')
        */
       login(email: string, password: string): Chainable<void>
       
       /**
-       * Custom command to logout a user
+       * Кастомная команда для выхода юзера
        * @example cy.logout()
        */
       logout(): Chainable<void>
       
       /**
-       * Custom command to clear all cookies and localStorage
+       * Кастомная команда для очистки всех куков и localStorage
        * @example cy.clearAuth()
        */
       clearAuth(): Chainable<void>
@@ -32,7 +32,7 @@ Cypress.Commands.add('login', (email: string, password: string) => {
     failOnStatusCode: false,
   }).then((response) => {
     if (response.status === 200) {
-      // Session cookie should be set automatically
+      // Кука сессии должна быть установлена автоматически
       cy.visit('/dashboard')
     }
   })

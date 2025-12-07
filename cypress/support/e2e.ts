@@ -1,21 +1,24 @@
 // ***********************************************************
-// This example support/e2e.ts is processed and
-// loaded automatically before your test files.
+// Этот пример support/e2e.ts обрабатывается и
+// загружается автоматически перед вашими тестовыми файлами.
 //
-// This is a great place to put global configuration and
-// behavior that modifies Cypress.
+// Это место для размещения глобальной конфигурации и
+// поведения, которое изменяет Cypress.
 //
-// You can change the location of this file or turn off
-// automatically serving support files with the
-// 'supportFile' configuration option.
+// Можно изменить местоположение этого файла или отключить
+// автоматическое обслуживание файлов поддержки с помощью
+// параметра конфигурации 'supportFile'.
 //
-// You can read more here:
+// Вы можете прочитать больше здесь:
 // https://on.cypress.io/configuration
 // ***********************************************************
 
-// Import commands.js using ES2015 syntax:
+// Импорт commands.js с использованием синтаксиса ES2015:
 import './commands'
 
-// Alternatively you can use CommonJS syntax:
+// Импорт утилит для работы с БД
+import './db'
+
+// Вместо этого можно использовать CommonJS синтаксис:
 // require('./commands')
 

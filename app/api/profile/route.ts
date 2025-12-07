@@ -1,17 +1,29 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
-import { getSessionUserId } from "@/lib/session";
-
-const prisma = new PrismaClient();
+import { getSession } from "@/lib/auth";
 
 export async function PUT(req: Request) {
-  const userId = await getSessionUserId();
-  const { name } = await req.json();
+  try {
+    const session = await getSession();
 
-  const updated = await prisma.user.update({
-    where: { id: userId },
-    data: { name },
-  });
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-  return NextResponse.json(updated);
+    const { name } = await req.json();
+
+    if (!name || name.trim().length < 2) {
+      return NextResponse.json({ error: "Invalid name" }, { status: 400 });
+    }
+
+    const updated = await prisma.user.update({
+      where: { id: session.userId },
+      data: { name },
+    });
+
+    return NextResponse.json(updated);
+  } catch (error: any) {
+    console.error("Profile update error:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
 }

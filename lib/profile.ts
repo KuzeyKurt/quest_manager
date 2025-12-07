@@ -1,13 +1,15 @@
-import { PrismaClient} from "@prisma/client"
-import { getSessionUserId } from "./session"
-
-const prisma = new PrismaClient();
+import { prisma } from "./prisma"
+import { getSession } from "./auth"
 
 export async function getUserProfile() {
-  const userId = await getSessionUserId(); // берем текущего пользователя
+  const session = await getSession();
+
+  if (!session) {
+    return null;
+  }
 
   const user = await prisma.user.findUnique({
-    where: { id: userId },
+    where: { id: session.userId },
     include: {
       teamMembers: {
         include: {
