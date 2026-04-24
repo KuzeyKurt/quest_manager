@@ -56,7 +56,7 @@ export function TeamDialog({ open, onOpenChange, onSave }: TeamDialogProps) {
               <Label htmlFor="name">Название проекта</Label>
               <Input
                 id="name"
-                placeholder="Engineering Team"
+                placeholder="Проект"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
@@ -75,7 +75,7 @@ export function TeamDialog({ open, onOpenChange, onSave }: TeamDialogProps) {
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+              Отмена
             </Button>
             <Button type="submit" disabled={loading}>
               {loading ? "Добавление..." : "Добавить проект"}

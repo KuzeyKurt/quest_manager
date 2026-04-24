@@ -6,17 +6,17 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   try {
     const session = await getSession()
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return NextResponse.json({ error: "Пользователь не авторизован" }, { status: 401 })
     }
 
     const { id } = await params
     const { email, role } = await request.json()
 
     if (!email) {
-      return NextResponse.json({ error: "Email is required" }, { status: 400 })
+      return NextResponse.json({ error: "Электронная почта обязательна" }, { status: 400 })
     }
 
-    // Check if user is admin
+    // Проверка на то, что пользователь является админом
     const membership = await prisma.teamMember.findFirst({
       where: {
         teamId: id,
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     })
 
     if (!membership) {
-      return NextResponse.json({ error: "Only admins can add members" }, { status: 403 })
+      return NextResponse.json({ error: "Только администратор может добавить участниковк команды." }, { status: 403 })
     }
 
     // Find user by email
@@ -35,10 +35,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     })
 
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 })
+      return NextResponse.json({ error: "Пользователь не найден" }, { status: 404 })
     }
 
-    // Check if already a member
+    // Проверка того, что пользователь уже добавлен в проект
     const existingMember = await prisma.teamMember.findUnique({
       where: {
         userId_teamId: {
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     })
 
     if (existingMember) {
-      return NextResponse.json({ error: "User is already a member" }, { status: 400 })
+      return NextResponse.json({ error: "Пользователь уже является участником" }, { status: 400 })
     }
 
     // Add member
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       data: {
         userId: user.id,
         teamId: id,
-        role: role || "member",
+        role: role || "участник",
       },
       include: {
         user: {
@@ -72,8 +72,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     return NextResponse.json({ member }, { status: 201 })
   } catch (error) {
-    console.error("[v0] Add member error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    console.error("[v0] Ошибка при добавлении пользователя:", error)
+    return NextResponse.json({ error: "Внутренняя ошибка сервера" }, { status: 500 })
   }
 }
 
@@ -81,7 +81,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
   try {
     const session = await getSession()
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return NextResponse.json({ error: "Не авторизован" }, { status: 401 })
     }
 
     const { id } = await params
@@ -89,7 +89,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     const memberId = searchParams.get("memberId")
 
     if (!memberId) {
-      return NextResponse.json({ error: "Member ID is required" }, { status: 400 })
+      return NextResponse.json({ error: "ID участника обязательно." }, { status: 400 })
     }
 
     // Check if user is admin
@@ -102,7 +102,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     })
 
     if (!membership) {
-      return NextResponse.json({ error: "Only admins can remove members" }, { status: 403 })
+      return NextResponse.json({ error: "Только администратор может удалить пользователей из проекта." }, { status: 403 })
     }
 
     await prisma.teamMember.delete({
@@ -112,6 +112,6 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error("[v0] Remove member error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    return NextResponse.json({ error: "Внутренняя ошибка сервера" }, { status: 500 })
   }
 }

@@ -7,12 +7,12 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   try {
     const session = await getSession()
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return NextResponse.json({ error: "не авторизованный пользователь" }, { status: 401 })
     }
 
     const { teamId } = await params
 
-    // Get all tasks for the team
+    // Отобразить все задачи из проекта
     const tasks = await prisma.task.findMany({
       where: { teamId },
       include: {
@@ -25,18 +25,18 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       },
     })
 
-    // Calculate statistics
+    // Расчет показателей статистики
     const totalTasks = tasks.length
     const todoTasks = tasks.filter((t) => t.status === "todo").length
     const inProgressTasks = tasks.filter((t) => t.status === "inprogress").length
     const completeTasks = tasks.filter((t) => t.status === "complete").length
 
-    // Priority breakdown
+    // Распределение приоритетов
     const highPriority = tasks.filter((t) => t.priority === "high").length
     const mediumPriority = tasks.filter((t) => t.priority === "medium").length
     const lowPriority = tasks.filter((t) => t.priority === "low").length
 
-    // Tasks by user
+    // Задачи у пользователя
     const tasksByUser = tasks.reduce(
       (acc, task) => {
         const userName = task.user.name
@@ -52,7 +52,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       {} as Record<string, { total: number; completed: number }>,
     )
 
-    // Tasks created over last 7 days
+    // Задача была добавлена в течении послежних 7 дней 
     const last7Days = Array.from({ length: 7 }, (_, i) => {
       const date = subDays(new Date(), 6 - i)
       return {
@@ -69,7 +69,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       }
     })
 
-    // Completion rate over last 7 days
+    // Оценка завершенных задач за послеждние 7 дней
     const completionData = Array.from({ length: 7 }, (_, i) => {
       const date = subDays(new Date(), 6 - i)
       const dateStr = date.toISOString().split("T")[0]
@@ -107,7 +107,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       tasksCompleted: completionData,
     })
   } catch (error) {
-    console.error("[v0] Get analytics error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    console.error("[v0] Получена ошибка аналитики:", error)
+    return NextResponse.json({ error: "Внутренняя ошибка сервера" }, { status: 500 })
   }
 }

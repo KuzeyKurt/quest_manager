@@ -3,47 +3,44 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  tasks         Task[]
-  teamMembers   TeamMember[]
-  createdTeams  Team[]       @relation("TeamCreator")
+  id           String       @id @default(cuid())
+  email        String       @unique
+  password     String
+  name         String
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  tasks        Task[]
+  createdTeams Team[]       @relation("TeamCreator")
+  teamMembers  TeamMember[]
 }
 
 model Team {
-  id          String   @id @default(cuid())
+  id          String       @id @default(cuid())
   name        String
   description String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
   creatorId   String
-
+  tasks       Task[]
   creator     User         @relation("TeamCreator", fields: [creatorId], references: [id], onDelete: Cascade)
   members     TeamMember[]
-  tasks       Task[]
 }
 
 model TeamMember {
-  id        String   @id @default(cuid())
-  role      String   @default("member")
-  joinedAt  DateTime @default(now())
-  userId    String
-  teamId    String
-
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
-
-  assignedTasks Task[] @relation("AssignedTasks")
+  id            String   @id @default(cuid())
+  role          String   @default("member")
+  joinedAt      DateTime @default(now())
+  userId        String
+  teamId        String
+  assignedTasks Task[]   @relation("AssignedTasks")
+  team          Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, teamId])
 }
@@ -57,15 +54,12 @@ model Task {
   order       Int         @default(0)
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
-
   userId      String
   teamId      String
-  
   assigneeId  String?
   assignee    TeamMember? @relation("AssignedTasks", fields: [assigneeId], references: [id])
-
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   team        Team        @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([teamId, status])
 }

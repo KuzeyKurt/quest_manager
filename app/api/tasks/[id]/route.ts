@@ -6,7 +6,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   try {
     const session = await getSession()
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return NextResponse.json({ error: "Пользователь не авторизован" }, { status: 401 })
     }
 
     const { id } = await params
@@ -28,8 +28,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     return NextResponse.json({ task })
   } catch (error) {
-    console.error("[v0] Update task error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    console.error("[v0] Ошибка удаления задачи:", error)
+    return NextResponse.json({ error: "Внутренняя ошибка сервера" }, { status: 500 })
   }
 }
 
@@ -37,7 +37,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
   try {
     const session = await getSession()
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return NextResponse.json({ error: "Пользователь не авторизован" }, { status: 401 })
     }
 
     const { id } = await params
@@ -48,7 +48,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error("[v0] Delete task error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    console.error("[v0] Ошибка удаления задачи:", error)
+    return NextResponse.json({ error: "Внутренняя ошибка сервера" }, { status: 500 })
   }
 }

@@ -121,7 +121,7 @@ export function DashboardClient({ user }: { user: User }) {
               <CardContent>
                 <Button onClick={() => setDialogOpen(true)}>
                   <Plus className="h-4 w-4 mr-2" />
-                  Дбавьте ваш первый проект
+                  Добавьте ваш первый проект
                 </Button>
               </CardContent>
             </Card>
