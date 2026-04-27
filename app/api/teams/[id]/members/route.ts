@@ -26,10 +26,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     })
 
     if (!membership) {
-      return NextResponse.json({ error: "Только администратор может добавить участниковк команды." }, { status: 403 })
+      return NextResponse.json({ error: "Только администратор может добавить участников команды." }, { status: 403 })
     }
 
-    // Find user by email
+    // Поиск пользователя по почте
     const user = await prisma.user.findUnique({
       where: { email },
     })
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       return NextResponse.json({ error: "Пользователь не найден" }, { status: 404 })
     }
 
-    // Проверка того, что пользователь уже добавлен в проект
+    // Проверка того, что пользователь уже добавлен
     const existingMember = await prisma.teamMember.findUnique({
       where: {
         userId_teamId: {

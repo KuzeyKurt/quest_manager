@@ -7,16 +7,16 @@ export async function POST(request: NextRequest) {
     const { email, password, name } = await request.json()
 
     if (!email || !password || !name) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+      return NextResponse.json({ error: "Пропущены обязательные поля" }, { status: 400 })
     }
 
-    // Check if user already exists
+    // Проверка, есть ли такой пользователь
     const existingUser = await prisma.user.findUnique({
       where: { email },
     })
 
     if (existingUser) {
-      return NextResponse.json({ error: "User already exists" }, { status: 400 })
+      return NextResponse.json({ error: "Такой пользователь уже есть" }, { status: 400 })
     }
 
     // Hash password and create user

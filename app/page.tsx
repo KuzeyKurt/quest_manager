@@ -95,7 +95,7 @@ export default function HomePage() {
 
       <footer className="border-t py-8 mx-auto">
         <div className="container text-center text-sm text-muted-foreground">
-          <p>&copy; 2025 TaskForce. Все права защищены.</p>
+          <p>&copy; 2026 TaskForce. Все права защищены.</p>
         </div>
       </footer>
     </div>

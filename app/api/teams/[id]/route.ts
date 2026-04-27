@@ -109,7 +109,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
   try {
     const session = await getSession()
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return NextResponse.json({ error: "Пользователь не авторизован" }, { status: 401 })
     }
 
     const { id } = await params
@@ -119,11 +119,11 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     })
 
     if (!team) {
-      return NextResponse.json({ error: "Team not found" }, { status: 404 })
+      return NextResponse.json({ error: "Проект на найден" }, { status: 404 })
     }
 
     if (team.creatorId !== session.userId) {
-      return NextResponse.json({ error: "Only team creator can delete team" }, { status: 403 })
+      return NextResponse.json({ error: "Только тот, кто добавил проект может удалить его." }, { status: 403 })
     }
 
     await prisma.team.delete({
@@ -132,7 +132,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error("[v0] Delete team error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    console.error("[v0] Ошибка удаления проекта:", error)
+    return NextResponse.json({ error: "Внутрення ошибка сервера" }, { status: 500 })
   }
 }
