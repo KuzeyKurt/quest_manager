@@ -24,6 +24,7 @@ interface Task {
   priority: string
   status: string
   order: number
+  assigneeId?: string | null
   user: {
     id: string
     name: string
@@ -33,9 +34,17 @@ interface Task {
 
 interface TaskBoardProps {
   teamId: string
+  teamMembers: Array<{
+    id: string
+    user: {
+      id: string
+      name: string
+      email: string
+    }
+  }>
 }
 
-export function TaskBoard({ teamId }: TaskBoardProps) {
+export function TaskBoard({ teamId, teamMembers }: TaskBoardProps) {
   const [tasks, setTasks] = useState<Task[]>([])
   const [activeTask, setActiveTask] = useState<Task | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -153,7 +162,14 @@ export function TaskBoard({ teamId }: TaskBoardProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       })
-      const { task } = await res.json()
+      const payload = await res.json()
+      if (!res.ok) {
+        throw new Error(payload?.error || "Не удалось обновить задачу")
+      }
+      const task = payload?.task
+      if (!task) {
+        throw new Error("Сервер вернул некорректный ответ при обновлении задачи")
+      }
       setTasks((prev) => prev.map((t) => (t.id === task.id ? task : t)))
     } else {
       const res = await fetch("/api/tasks", {
@@ -161,7 +177,14 @@ export function TaskBoard({ teamId }: TaskBoardProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...data, teamId }),
       })
-      const { task } = await res.json()
+      const payload = await res.json()
+      if (!res.ok) {
+        throw new Error(payload?.error || "Не удалось создать задачу")
+      }
+      const task = payload?.task
+      if (!task) {
+        throw new Error("Сервер вернул некорректный ответ при создании задачи")
+      }
       setTasks((prev) => [...prev, task])
     }
   }
@@ -214,7 +237,17 @@ export function TaskBoard({ teamId }: TaskBoardProps) {
         </DragOverlay>
       </DndContext>
 
-      <TaskDialog open={dialogOpen} onOpenChange={setDialogOpen} task={editingTask} onSave={handleSaveTask} />
+      <TaskDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        task={editingTask}
+        onSave={handleSaveTask}
+        teamMembers={teamMembers.map((m) => ({
+          id: m.id,
+          name: m.user.name,
+          email: m.user.email,
+        }))}
+      />
     </>
   )
 }

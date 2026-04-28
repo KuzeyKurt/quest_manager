@@ -44,10 +44,26 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { title, description, teamId, priority, status } = await request.json()
+    const { title, description, teamId, priority, status, assigneeId } = await request.json()
 
     if (!title || !teamId) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+    }
+
+    const rawAssigneeId = typeof assigneeId === "string" ? assigneeId.trim() : ""
+    let normalizedAssigneeId: string | null = null
+
+    if (rawAssigneeId) {
+      const teamMember = await prisma.teamMember.findFirst({
+        where: {
+          teamId,
+          OR: [{ id: rawAssigneeId }, { userId: rawAssigneeId }],
+        },
+        select: { id: true },
+      })
+
+      // Ignore stale/invalid assignee from client on create.
+      normalizedAssigneeId = teamMember?.id ?? null
     }
 
     // Get the highest order number for the status
@@ -64,6 +80,7 @@ export async function POST(request: NextRequest) {
         userId: session.userId,
         priority: priority || "medium",
         status: status || "todo",
+        ...(normalizedAssigneeId ? { assignee: { connect: { id: normalizedAssigneeId } } } : {}),
         order: lastTask ? lastTask.order + 1 : 0,
       },
       include: {
@@ -72,6 +89,17 @@ export async function POST(request: NextRequest) {
             id: true,
             name: true,
             email: true,
+          },
+        },
+        assignee: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
           },
         },
       },

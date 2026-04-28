@@ -71,7 +71,7 @@ export function TeamPageClient({ team, currentUserId }: TeamPageClientProps) {
           </TabsList>
 
           <TabsContent value="board">
-            <TaskBoard teamId={team.id} />
+            <TaskBoard teamId={team.id} teamMembers={team.members} />
           </TabsContent>
 
           <TabsContent value="members">

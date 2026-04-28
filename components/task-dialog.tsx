@@ -23,7 +23,13 @@ interface Task {
   description: string | null
   priority: string
   status: string
-  assignee: string | null
+  assigneeId: string | null
+}
+
+interface TeamMemberOption {
+  id: string
+  name: string
+  email: string
 }
 
 interface TaskDialogProps {
@@ -31,14 +37,15 @@ interface TaskDialogProps {
   onOpenChange: (open: boolean) => void
   task: Task | null
   onSave: (data: Partial<Task>) => Promise<void>
+  teamMembers: TeamMemberOption[]
 }
 
-export function TaskDialog({ open, onOpenChange, task, onSave }: TaskDialogProps) {
+export function TaskDialog({ open, onOpenChange, task, onSave, teamMembers }: TaskDialogProps) {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [priority, setPriority] = useState("medium")
   const [status, setStatus] = useState("todo")
-  const [assignee, setAssignee] = useState("")
+  const [assignee, setAssignee] = useState("unassigned")
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
@@ -47,12 +54,13 @@ export function TaskDialog({ open, onOpenChange, task, onSave }: TaskDialogProps
       setDescription(task.description || "")
       setPriority(task.priority)
       setStatus(task.status)
+      setAssignee(task.assigneeId || "unassigned")
     } else {
       setTitle("")
       setDescription("")
       setPriority("medium")
       setStatus("todo")
-      setAssignee("")
+      setAssignee("unassigned")
     }
   }, [task])
 
@@ -66,6 +74,7 @@ export function TaskDialog({ open, onOpenChange, task, onSave }: TaskDialogProps
         description: description || null,
         priority,
         status,
+        assigneeId: assignee === "unassigned" ? null : assignee,
       })
       onOpenChange(false)
     } catch (error) {
@@ -137,13 +146,15 @@ export function TaskDialog({ open, onOpenChange, task, onSave }: TaskDialogProps
                 <Label htmlFor="assignee">Назначен</Label>
                 <Select value={assignee} onValueChange={setAssignee}>
                   <SelectTrigger id="assignee">
-                    <SelectValue />
+                    <SelectValue placeholder="Выберите участника" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Burak">Бурак Озчивит</SelectItem>
-                    <SelectItem value="Rayan">Райан Гослинг</SelectItem>
-                    <SelectItem value="Diana">Диана Азаматова</SelectItem>
-                    <SelectItem value="Safie">Сафие Короглу</SelectItem>
+                    <SelectItem value="unassigned">Не назначен</SelectItem>
+                    {teamMembers.map((member) => (
+                      <SelectItem key={member.id} value={member.id}>
+                        {member.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
