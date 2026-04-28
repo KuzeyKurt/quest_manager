@@ -64,7 +64,16 @@ export function DashboardClient({ user }: { user: User }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     })
-    const { team } = await res.json()
+    const payload = await res.json()
+    if (!res.ok) {
+      throw new Error(payload?.error || "Не удалось создать проект")
+    }
+
+    const team = payload?.team
+    if (!team) {
+      throw new Error("Сервер вернул некорректный ответ")
+    }
+
     setTeams((prev) => [...prev, team])
   }
 

@@ -1,12 +1,12 @@
-import { cookies } from "next/headers";
+import { getSession } from "@/lib/auth"
 
 export async function getSessionUserId() {
-  const cookieStore = await cookies(); // нужен await
-  const userId = cookieStore.get("userId")?.value;
+  const session = await getSession()
+  const userId = session?.userId
 
   if (!userId) {
-    throw new Error("User not authenticated");
+    throw new Error("User not authenticated")
   }
 
-  return userId;
+  return userId
 }

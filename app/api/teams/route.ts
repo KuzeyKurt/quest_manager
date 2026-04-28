@@ -92,6 +92,12 @@ export async function POST(request: NextRequest) {
             },
           },
         },
+        _count: {
+          select: {
+            tasks: true,
+            members: true,
+          },
+        },
       },
     })
 

@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
-import { getSession } from "@/lib/auth"
+import { verifyToken } from "@/lib/auth"
 
 export async function middleware(request: NextRequest) {
-  const session = await getSession()
+  const token = request.cookies.get("token")?.value
+  const session = token ? await verifyToken(token) : null
   const isAuthPage = request.nextUrl.pathname.startsWith("/login") || request.nextUrl.pathname.startsWith("/register")
 
   if (!session && !isAuthPage && request.nextUrl.pathname !== "/") {
