@@ -1,12 +1,12 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { TeamDialog } from "@/components/team-dialog"
 import { TeamCard } from "@/components/team-card"
-import { Plus, LogOut, Users } from "lucide-react"
+import { SidebarTrigger } from "@/components/ui/sidebar"
+import { Plus } from "lucide-react"
 
 interface User {
   id: string
@@ -38,7 +38,6 @@ interface Team {
 }
 
 export function DashboardClient({ user }: { user: User }) {
-  const router = useRouter()
   const [teams, setTeams] = useState<Team[]>([])
   const [dialogOpen, setDialogOpen] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -59,12 +58,6 @@ export function DashboardClient({ user }: { user: User }) {
     }
   }
 
-  const handleLogout = async () => {
-    await fetch("/api/auth/logout", { method: "POST" })
-    router.push("/login")
-    router.refresh()
-  }
-
   const handleCreateTeam = async (data: { name: string; description: string }) => {
     const res = await fetch("/api/teams", {
       method: "POST",
@@ -76,26 +69,12 @@ export function DashboardClient({ user }: { user: User }) {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b pl-20 pr-20">
-        <div className="container flex h-16 items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Users className="h-6 w-6" />
-            <span className="text-xl  font-bold">TaskForce</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-muted-foreground"
-            onClick={() => router.push("/profile")}
-            >{user.name}</span>
-            <Button variant="ghost" size="sm" onClick={handleLogout}>
-              <LogOut className="h-4 w-4 mr-2" />
-              Выйти
-            </Button>
-          </div>
-        </div>
+    <div className="flex min-h-0 flex-1 flex-col bg-background">
+      <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
+        <SidebarTrigger />
       </header>
 
-      <main className="container mx-auto py-8">
+      <main className="container mx-auto flex-1 py-8">
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
             <div>

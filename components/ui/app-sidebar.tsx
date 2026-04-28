@@ -64,7 +64,7 @@ export function AppSidebar() {
             {state === "collapsed" ? (
               <div className="text-2xl font-bold text-violet-500">TF</div>
             ) : (
-              <span className="text-3xl font-bold tracking-tight text-white">
+              <span className="text-3xl font-bold tracking-tight text-violet-500">
                 TaskForce
               </span>
             )}
@@ -104,11 +104,11 @@ export function AppSidebar() {
 
       {/* Footer */}
       <SidebarFooter className="border-t border-border p-4">
-        <div className="flex flex-col gap-">
+        <div className="flex flex-col gap-2">
           {state !== "collapsed" && (
-            <div className="flex items-center **justify-center** gap-2 p-2 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors"
+            <div className="flex items-center justify-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors"
             onClick={() => window.location.href = '/profile'} >
-              <Avatar className="h-11 w-11 shrink-2">
+              <Avatar className="h-11 w-11 shrink-0">
                 <AvatarFallback className="bg-violet-600 text-base font-semibold">
                   {initials}
                 </AvatarFallback>
@@ -133,7 +133,7 @@ export function AppSidebar() {
                 window.location.href = '/login'
               }
             }}
-            className="w-full justify-center text-white-400 hover:text-violet-500 hover:bg-violet-950/50"
+            className="w-full justify-center text-muted-foreground hover:text-violet-500 hover:bg-violet-950/50"
             size={state === "collapsed" ? "icon" : "default"}
           >
             <LogOut className="h-5 w-5" />

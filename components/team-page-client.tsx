@@ -1,8 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
+import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { TaskBoard } from "@/components/task-board"
 import { TeamMembersPanel } from "@/components/team-members-panel"
@@ -37,15 +37,15 @@ interface TeamPageClientProps {
 }
 
 export function TeamPageClient({ team, currentUserId }: TeamPageClientProps) {
-  const router = useRouter()
   const [activeTab, setActiveTab] = useState("board")
 
   const isAdmin = team.members.find((m) => m.user.id === currentUserId)?.role === "admin"
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b pl-20 pr-20">
-        <div className="container flex h-16 items-center gap-4">
+    <div className="flex min-h-0 flex-1 flex-col bg-background">
+      <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
+        <SidebarTrigger />
+        <div className="container flex flex-1 items-center gap-4">
           <Link href="/dashboard">
             <Button variant="ghost" size="sm">
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -59,7 +59,7 @@ export function TeamPageClient({ team, currentUserId }: TeamPageClientProps) {
         </div>
       </header>
 
-      <main className="container mx-auto py-8">
+      <main className="container mx-auto flex-1 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-6">
             <TabsTrigger value="board">Доска задач</TabsTrigger>
