@@ -13,6 +13,12 @@ interface Task {
   title: string
   description: string | null
   priority: string
+  assignee?: {
+    user: {
+      name: string
+      email: string
+    }
+  } | null
   user: {
     name: string
   }
@@ -67,7 +73,11 @@ export function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
             >
               {task.priority}
             </Badge>
-            <span className="text-xs text-muted-foreground">{task.user.name}</span>
+            <span className="text-xs text-muted-foreground">
+              {task.assignee
+                ? `Исполнитель: ${task.assignee.user.name || task.assignee.user.email}`
+                : "Исполнитель: не назначен"}
+            </span>
           </div>
         </div>
         <div className="flex gap-1">

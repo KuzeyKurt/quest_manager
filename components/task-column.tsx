@@ -13,6 +13,12 @@ interface Task {
   description: string | null
   priority: string
   status: string
+  assignee?: {
+    user: {
+      name: string
+      email: string
+    }
+  } | null
   user: {
     name: string
   }

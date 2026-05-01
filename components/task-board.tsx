@@ -25,6 +25,14 @@ interface Task {
   status: string
   order: number
   assigneeId?: string | null
+  assignee?: {
+    id: string
+    user: {
+      id: string
+      name: string
+      email: string
+    }
+  } | null
   user: {
     id: string
     name: string
@@ -171,6 +179,7 @@ export function TaskBoard({ teamId, teamMembers }: TaskBoardProps) {
         throw new Error("Сервер вернул некорректный ответ при обновлении задачи")
       }
       setTasks((prev) => prev.map((t) => (t.id === task.id ? task : t)))
+      await fetchTasks()
     } else {
       const res = await fetch("/api/tasks", {
         method: "POST",
@@ -186,6 +195,7 @@ export function TaskBoard({ teamId, teamMembers }: TaskBoardProps) {
         throw new Error("Сервер вернул некорректный ответ при создании задачи")
       }
       setTasks((prev) => [...prev, task])
+      await fetchTasks()
     }
   }
 
@@ -243,7 +253,7 @@ export function TaskBoard({ teamId, teamMembers }: TaskBoardProps) {
         task={editingTask}
         onSave={handleSaveTask}
         teamMembers={teamMembers.map((m) => ({
-          id: m.id,
+          userId: m.user.id,
           name: m.user.name,
           email: m.user.email,
         }))}

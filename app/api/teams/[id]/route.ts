@@ -59,7 +59,13 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     }
 
     const { id } = await params
-    const { name, description } = await request.json()
+    const body = await request.json()
+    const name = typeof body?.name === "string" ? body.name.trim() : ""
+    const description = typeof body?.description === "string" ? body.description.trim() : null
+
+    if (!name) {
+      return NextResponse.json({ error: "Название проекта обязательно" }, { status: 400 })
+    }
 
     const team = await prisma.team.findUnique({
       where: { id },
@@ -69,8 +75,17 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       return NextResponse.json({ error: "Team not found" }, { status: 404 })
     }
 
-    if (team.creatorId !== session.userId) {
-      return NextResponse.json({ error: "Only team creator can update team" }, { status: 403 })
+    const membership = await prisma.teamMember.findFirst({
+      where: {
+        teamId: id,
+        userId: session.userId,
+        role: "admin",
+      },
+      select: { id: true },
+    })
+
+    if (!membership) {
+      return NextResponse.json({ error: "Только администратор может редактировать проект" }, { status: 403 })
     }
 
     const updatedTeam = await prisma.team.update({

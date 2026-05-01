@@ -24,10 +24,15 @@ interface Task {
   priority: string
   status: string
   assigneeId: string | null
+  assignee?: {
+    user: {
+      id: string
+    }
+  } | null
 }
 
 interface TeamMemberOption {
-  id: string
+  userId: string
   name: string
   email: string
 }
@@ -54,7 +59,7 @@ export function TaskDialog({ open, onOpenChange, task, onSave, teamMembers }: Ta
       setDescription(task.description || "")
       setPriority(task.priority)
       setStatus(task.status)
-      setAssignee(task.assigneeId || "unassigned")
+      setAssignee(task.assignee?.user?.id || "unassigned")
     } else {
       setTitle("")
       setDescription("")
@@ -151,7 +156,7 @@ export function TaskDialog({ open, onOpenChange, task, onSave, teamMembers }: Ta
                   <SelectContent>
                     <SelectItem value="unassigned">Не назначен</SelectItem>
                     {teamMembers.map((member) => (
-                      <SelectItem key={member.id} value={member.id}>
+                      <SelectItem key={member.userId} value={member.userId}>
                         {member.name}
                       </SelectItem>
                     ))}

@@ -2,6 +2,34 @@ import { type NextRequest, NextResponse } from "next/server"
 import { getSession } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 
+async function hydrateTaskAssignee<T extends { assigneeId: string | null; teamId: string; assignee: any }>(task: T): Promise<T> {
+  if (!task.assigneeId || task.assignee) {
+    return task
+  }
+
+  const member = await prisma.teamMember.findFirst({
+    where: {
+      teamId: task.teamId,
+      OR: [{ id: task.assigneeId }, { userId: task.assigneeId }],
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+    },
+  })
+
+  if (!member) {
+    return task
+  }
+
+  return { ...task, assignee: member }
+}
+
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getSession()
@@ -27,23 +55,26 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
           ? body.assigneeId.trim()
           : ""
 
-    let normalizedAssigneeId: string | null | undefined
+    let normalizedAssigneeIds: Array<string | null> | undefined
     if (rawAssigneeId === undefined) {
-      normalizedAssigneeId = undefined
+      normalizedAssigneeIds = undefined
     } else if (!rawAssigneeId) {
-      normalizedAssigneeId = null
+      normalizedAssigneeIds = [null]
     } else {
       const teamMember = await prisma.teamMember.findFirst({
         where: {
           teamId: existingTask.teamId,
           OR: [{ id: rawAssigneeId }, { userId: rawAssigneeId }],
         },
-        select: { id: true },
+        select: { id: true, userId: true },
       })
 
-      // If stale/invalid assignee comes from client, clear assignment
-      // instead of attempting to connect an invalid FK value.
-      normalizedAssigneeId = teamMember?.id ?? null
+      // Try both TeamMember.id and User.id to be resilient to old DB constraints.
+      if (teamMember) {
+        normalizedAssigneeIds = Array.from(new Set([teamMember.id, teamMember.userId]))
+      } else {
+        normalizedAssigneeIds = [rawAssigneeId]
+      }
     }
 
     const data = {
@@ -51,45 +82,81 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       ...(body.description !== undefined ? { description: body.description } : {}),
       ...(body.priority !== undefined ? { priority: body.priority } : {}),
       ...(body.status !== undefined ? { status: body.status } : {}),
-      ...(normalizedAssigneeId !== undefined
-        ? {
-            assignee: normalizedAssigneeId
-              ? { connect: { id: normalizedAssigneeId } }
-              : { disconnect: true },
-          }
-        : {}),
     }
 
-    const task = await prisma.task.update({
-      where: { id },
-      data,
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
+    const include = {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
         },
-        assignee: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-              },
+      },
+      assignee: {
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
             },
           },
         },
       },
-    })
-
-    return NextResponse.json({ task })
-  } catch (error: any) {
-    if (error?.code === "P2003") {
-      return NextResponse.json({ error: "Failed to update task assignee" }, { status: 400 })
     }
+
+    let task
+    if (normalizedAssigneeIds === undefined) {
+      task = await prisma.task.update({
+        where: { id },
+        data,
+        include,
+      })
+    } else {
+      let lastError: any = null
+      for (const candidate of normalizedAssigneeIds) {
+        try {
+          task = await prisma.task.update({
+            where: { id },
+            data: {
+              ...data,
+              assigneeId: candidate,
+            },
+            include,
+          })
+          break
+        } catch (error: any) {
+          if (error?.code !== "P2003") {
+            throw error
+          }
+          lastError = error
+        }
+      }
+
+      if (!task) {
+        if (normalizedAssigneeIds.length === 1 && normalizedAssigneeIds[0] === null) {
+          task = await prisma.task.update({
+            where: { id },
+            data: {
+              ...data,
+              assigneeId: null,
+            },
+            include,
+          })
+        } else if (lastError) {
+          throw lastError
+        }
+      }
+    }
+
+    if (!task) {
+      return NextResponse.json({ error: "Не удалось обновить исполнителя задачи" }, { status: 400 })
+    }
+
+    const hydratedTask = await hydrateTaskAssignee(task)
+
+    return NextResponse.json({ task: hydratedTask })
+  } catch (error: any) {
     console.error("[v0] Ошибка обновления задачи:", error)
     return NextResponse.json({ error: "Внутренняя ошибка сервера" }, { status: 500 })
   }

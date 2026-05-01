@@ -30,3 +30,45 @@ export async function GET() {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
+
+export async function PATCH(request: Request) {
+  try {
+    const session = await getSession()
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const body = await request.json()
+    const name = typeof body?.name === "string" ? body.name.trim() : ""
+    const email = typeof body?.email === "string" ? body.email.trim().toLowerCase() : ""
+
+    if (!name || !email) {
+      return NextResponse.json({ error: "Имя и электронная почта обязательны" }, { status: 400 })
+    }
+
+    const existingByEmail = await prisma.user.findUnique({
+      where: { email },
+      select: { id: true },
+    })
+
+    if (existingByEmail && existingByEmail.id !== session.userId) {
+      return NextResponse.json({ error: "Эта электронная почта уже используется" }, { status: 400 })
+    }
+
+    const user = await prisma.user.update({
+      where: { id: session.userId },
+      data: { name, email },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        createdAt: true,
+      },
+    })
+
+    return NextResponse.json({ user })
+  } catch (error) {
+    console.error("[v0] Update user error:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+  }
+}

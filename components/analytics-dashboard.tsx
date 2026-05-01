@@ -205,7 +205,7 @@ export function AnalyticsDashboard({ teamId }: AnalyticsDashboardProps) {
           <CardContent>
             <ChartContainer
               config={{
-                count: { label: "Tasks Created", color: "hsl(var(--chart-2))" },
+                count: { label: "Добавлено задач: ", color: "hsl(var(--chart-2))" },
               }}
               className="h-[300px]"
             >
@@ -220,7 +220,14 @@ export function AnalyticsDashboard({ teamId }: AnalyticsDashboardProps) {
                   />
                   <YAxis />
                   <ChartTooltip content={<ChartTooltipContent />} />
-                  <Line type="monotone" dataKey="count" stroke="hsl(var(--chart-2))" strokeWidth={2} />
+                  <Line
+                    type="monotone"
+                    dataKey="count"
+                    stroke="hsl(var(--chart-2))"
+                    strokeWidth={2}
+                    dot={{ r: 4, fill: "hsl(var(--chart-2))" }}
+                    activeDot={{ r: 6, fill: "hsl(var(--chart-2))" }}
+                  />
                 </LineChart>
               </ResponsiveContainer>
             </ChartContainer>
@@ -229,13 +236,13 @@ export function AnalyticsDashboard({ teamId }: AnalyticsDashboardProps) {
 
         <Card>
           <CardHeader>
-            <CardTitle>Добавлено задач за последние 7 дней</CardTitle>
+            <CardTitle>Выполнено задач за последние 7 дней</CardTitle>
             <CardDescription>Тенденция создания задач по дням</CardDescription>
           </CardHeader>
           <CardContent>
             <ChartContainer
               config={{
-                completed: { label: "Tasks Completed", color: "hsl(var(--chart-3))" },
+                completed: { label: "Выполнено задач: ", color: "hsl(var(--chart-3))" },
               }}
               className="h-[300px]"
             >
@@ -250,7 +257,14 @@ export function AnalyticsDashboard({ teamId }: AnalyticsDashboardProps) {
                   />
                   <YAxis />
                   <ChartTooltip content={<ChartTooltipContent />} />
-                  <Line type="monotone" dataKey="completed" stroke="hsl(var(--chart-3))" strokeWidth={2} />
+                  <Line
+                    type="monotone"
+                    dataKey="completed"
+                    stroke="hsl(var(--chart-3))"
+                    strokeWidth={2}
+                    dot={{ r: 4, fill: "hsl(var(--chart-3))" }}
+                    activeDot={{ r: 6, fill: "hsl(var(--chart-3))" }}
+                  />
                 </LineChart>
               </ResponsiveContainer>
             </ChartContainer>
