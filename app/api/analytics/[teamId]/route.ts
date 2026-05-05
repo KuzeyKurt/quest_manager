@@ -3,6 +3,8 @@ import { getSession } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { subDays, startOfDay, endOfDay } from "date-fns"
 
+export const dynamic = "force-dynamic"
+
 export async function GET(request: NextRequest, { params }: { params: Promise<{ teamId: string }> }) {
   try {
     const session = await getSession()

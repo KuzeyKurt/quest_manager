@@ -1,4 +1,4 @@
-import { PrismaClient } from "@/lib/prisma-client";
+import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { getSessionUserId } from "@/lib/session";
 
