@@ -1,4 +1,4 @@
-import { PrismaClient} from "@prisma/client"
+import { PrismaClient } from "./prisma-client"
 import { getSessionUserId } from "./session"
 
 const prisma = new PrismaClient();
