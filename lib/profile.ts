@@ -1,21 +1,21 @@
-import { PrismaClient } from "@prisma/client"
 import { getSessionUserId } from "./session"
-
-const prisma = new PrismaClient();
+import { prisma, withPrismaRetry } from "./prisma"
 
 export async function getUserProfile() {
-  const userId = await getSessionUserId(); // берем текущего пользователя
+  const userId = await getSessionUserId() // берем текущего пользователя
 
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    include: {
-      teamMembers: {
-        include: {
-          team: true,
+  const user = await withPrismaRetry(() =>
+    prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        teamMembers: {
+          include: {
+            team: true,
+          },
         },
       },
-    },
-  });
+    }),
+  )
 
-  return user;
+  return user
 }

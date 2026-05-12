@@ -23,6 +23,7 @@ interface Task {
   description: string | null
   priority: string
   status: string
+  deadline?: string | null
   assigneeId: string | null
   assignee?: {
     user: {
@@ -51,6 +52,7 @@ export function TaskDialog({ open, onOpenChange, task, onSave, teamMembers }: Ta
   const [priority, setPriority] = useState("medium")
   const [status, setStatus] = useState("todo")
   const [assignee, setAssignee] = useState("unassigned")
+  const [deadline, setDeadline] = useState<string>("")
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
@@ -60,12 +62,14 @@ export function TaskDialog({ open, onOpenChange, task, onSave, teamMembers }: Ta
       setPriority(task.priority)
       setStatus(task.status)
       setAssignee(task.assignee?.user?.id || "unassigned")
+      setDeadline(task.deadline ? String(task.deadline).slice(0, 16) : "")
     } else {
       setTitle("")
       setDescription("")
       setPriority("medium")
       setStatus("todo")
       setAssignee("unassigned")
+      setDeadline("")
     }
   }, [task])
 
@@ -80,6 +84,7 @@ export function TaskDialog({ open, onOpenChange, task, onSave, teamMembers }: Ta
         priority,
         status,
         assigneeId: assignee === "unassigned" ? null : assignee,
+        deadline: deadline ? new Date(deadline).toISOString() : null,
       })
       onOpenChange(false)
     } catch (error) {
@@ -162,6 +167,15 @@ export function TaskDialog({ open, onOpenChange, task, onSave, teamMembers }: Ta
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="space-y-2 col-span-2">
+                <Label htmlFor="deadline">Дедлайн (опционально)</Label>
+                <Input
+                  id="deadline"
+                  type="datetime-local"
+                  value={deadline}
+                  onChange={(e) => setDeadline(e.target.value)}
+                />
               </div>
             </div>
           </div>

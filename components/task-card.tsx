@@ -13,6 +13,7 @@ interface Task {
   title: string
   description: string | null
   priority: string
+  deadline?: string | null
   assignee?: {
     user: {
       name: string
@@ -46,6 +47,13 @@ export function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
     high: "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20",
   }
 
+  const formattedDeadline = (() => {
+    if (!task.deadline) return "не установлена"
+    const d = new Date(task.deadline)
+    if (Number.isNaN(d.getTime())) return "не установлена"
+    return d.toLocaleDateString("ru-RU")
+  })()
+
   return (
     <Card
       ref={setNodeRef}
@@ -78,6 +86,7 @@ export function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
                 ? `Исполнитель: ${task.assignee.user.name || task.assignee.user.email}`
                 : "Исполнитель: не назначен"}
             </span>
+            <span className="text-xs text-muted-foreground">Дата завершения: {formattedDeadline}</span>
           </div>
         </div>
         <div className="flex gap-1">

@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { hashPassword, setSession } from "@/lib/auth"
+import { attachSessionToResponse, hashPassword } from "@/lib/auth"
 
 export async function POST(request: NextRequest) {
   try {
@@ -29,10 +29,7 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    // Set session
-    await setSession(user.id)
-
-    return NextResponse.json(
+    const response = NextResponse.json(
       {
         user: {
           id: user.id,
@@ -42,6 +39,8 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 },
     )
+    await attachSessionToResponse(response, user.id)
+    return response
   } catch (error) {
     console.error("[v0] Registration error:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })

@@ -1,6 +1,56 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getSession } from "@/lib/auth"
-import { prisma } from "@/lib/prisma"
+import { ensureTaskDeadlineColumn, prisma } from "@/lib/prisma"
+
+const taskResponseSelect = {
+  id: true,
+  title: true,
+  description: true,
+  status: true,
+  priority: true,
+  deadline: true,
+  order: true,
+  createdAt: true,
+  updatedAt: true,
+  userId: true,
+  teamId: true,
+  assigneeId: true,
+  user: {
+    select: {
+      id: true,
+      name: true,
+      email: true,
+    },
+  },
+  assignee: {
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+    },
+  },
+}
+
+function isMissingTaskDeadlineColumn(error: any): boolean {
+  if (error?.code !== "P2022") {
+    return false
+  }
+
+  const column = String(error?.meta?.column ?? "").toLowerCase()
+  const message = String(error?.message ?? "").toLowerCase()
+
+  return (
+    column === "deadline" ||
+    column.endsWith(".deadline") ||
+    message.includes("`deadline` does not exist") ||
+    message.includes("column `deadline` does not exist") ||
+    message.includes("task.deadline")
+  )
+}
 
 async function hydrateTaskAssignees<T extends { assigneeId: string | null; teamId: string; assignee: any }>(tasks: T[]): Promise<T[]> {
   const unresolved = tasks.filter((task) => task.assigneeId && !task.assignee)
@@ -50,6 +100,8 @@ async function hydrateTaskAssignees<T extends { assigneeId: string | null; teamI
 
 export async function GET(request: NextRequest) {
   try {
+    await ensureTaskDeadlineColumn()
+
     const session = await getSession()
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -64,26 +116,7 @@ export async function GET(request: NextRequest) {
 
     const tasks = await prisma.task.findMany({
       where: { teamId },
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-        assignee: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-              },
-            },
-          },
-        },
-      },
+      select: taskResponseSelect,
       orderBy: { order: "asc" },
     })
 
@@ -98,15 +131,28 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    await ensureTaskDeadlineColumn()
+
     const session = await getSession()
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { title, description, teamId, priority, status, assigneeId } = await request.json()
+    const { title, description, teamId, priority, status, assigneeId, deadline } = await request.json()
 
     if (!title || !teamId) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+    }
+
+    const normalizedDeadline =
+      deadline === null || deadline === undefined || deadline === ""
+        ? null
+        : typeof deadline === "string"
+          ? new Date(deadline)
+          : null
+
+    if (normalizedDeadline && Number.isNaN(normalizedDeadline.getTime())) {
+      return NextResponse.json({ error: "Invalid deadline" }, { status: 400 })
     }
 
     const rawAssigneeId = typeof assigneeId === "string" ? assigneeId.trim() : ""
@@ -132,6 +178,7 @@ export async function POST(request: NextRequest) {
     const lastTask = await prisma.task.findFirst({
       where: { teamId, status: status || "todo" },
       orderBy: { order: "desc" },
+      select: { order: true },
     })
 
     const baseData = {
@@ -142,27 +189,7 @@ export async function POST(request: NextRequest) {
       priority: priority || "medium",
       status: status || "todo",
       order: lastTask ? lastTask.order + 1 : 0,
-    }
-
-    const include = {
-      user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-        },
-      },
-      assignee: {
-        include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
-          },
-        },
-      },
+      deadline: normalizedDeadline,
     }
 
     let task
@@ -174,10 +201,22 @@ export async function POST(request: NextRequest) {
             ...baseData,
             assigneeId: candidate,
           },
-          include,
+          select: taskResponseSelect,
         })
         break
       } catch (error: any) {
+        if (isMissingTaskDeadlineColumn(error)) {
+          const { deadline: _deadline, ...baseDataWithoutDeadline } = baseData
+          task = await prisma.task.create({
+            data: {
+              ...baseDataWithoutDeadline,
+              assigneeId: candidate,
+            },
+            select: taskResponseSelect,
+          })
+          break
+        }
+
         if (error?.code !== "P2003") {
           throw error
         }
@@ -194,7 +233,7 @@ export async function POST(request: NextRequest) {
           ...baseData,
           assigneeId: null,
         },
-        include,
+        select: taskResponseSelect,
       })
     }
 

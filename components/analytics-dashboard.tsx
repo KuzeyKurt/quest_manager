@@ -18,6 +18,8 @@ import {
 } from "recharts"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { CheckCircle2, Clock, ListTodo, TrendingUp } from "lucide-react"
+import { fetchWithTimeout } from "@/lib/fetch-with-timeout"
+import { redirectToLoginPreservingReturn } from "@/lib/redirect-login"
 
 interface AnalyticsData {
   overview: {
@@ -53,29 +55,73 @@ interface AnalyticsDashboardProps {
 export function AnalyticsDashboard({ teamId }: AnalyticsDashboardProps) {
   const [data, setData] = useState<AnalyticsData | null>(null)
   const [loading, setLoading] = useState(true)
+  const [fetchError, setFetchError] = useState<string | null>(null)
+
+  const [reloadTick, setReloadTick] = useState(0)
 
   useEffect(() => {
-    fetchAnalytics()
-  }, [teamId])
-
-  const fetchAnalytics = async () => {
-    try {
-      const res = await fetch(`/api/analytics/${teamId}`)
-      const analyticsData = await res.json()
-      setData(analyticsData)
-    } catch (error) {
-      console.error("[v0] Fetch analytics error:", error)
-    } finally {
-      setLoading(false)
+    let cancelled = false
+    async function load() {
+      setLoading(true)
+      setFetchError(null)
+      try {
+        const res = await fetchWithTimeout(`/api/analytics/${teamId}`, { method: "GET" })
+        const payload = await res.json().catch(() => null)
+        if (cancelled) return
+        if (!res.ok) {
+          if (res.status === 401) {
+            redirectToLoginPreservingReturn()
+            return
+          }
+          const apiMsg =
+            payload && typeof (payload as { error?: unknown }).error === "string"
+              ? (payload as { error: string }).error
+              : "Не удалось загрузить аналитику"
+          setData(null)
+          setFetchError(apiMsg)
+          return
+        }
+        setData(payload as AnalyticsData)
+      } catch (error: unknown) {
+        const name = typeof error === "object" && error && "name" in error ? (error as Error).name : ""
+        if (!cancelled) {
+          setData(null)
+          setFetchError(
+            name === "AbortError"
+              ? "Таймаут загрузки аналитики. Проверьте доступность базы данных."
+              : error instanceof Error
+                ? error.message
+                : "Не удалось загрузить аналитику",
+          )
+          console.error("[v0] Fetch analytics error:", error)
+        }
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
     }
-  }
+    void load()
+    return () => {
+      cancelled = true
+    }
+  }, [teamId, reloadTick])
 
   if (loading) {
-    return <div className="flex items-center justify-center h-96">Loading analytics...</div>
+    return <div className="flex items-center justify-center h-96">Загрузка аналитики...</div>
   }
 
   if (!data) {
-    return <div className="flex items-center justify-center h-96">No data available</div>
+    return (
+      <div className="flex flex-col items-center justify-center gap-3 min-h-[16rem] text-center px-4">
+        <p className="text-sm text-muted-foreground">{fetchError ?? "Данные недоступны"}</p>
+        <button
+          type="button"
+          className="text-sm underline underline-offset-4 text-primary"
+          onClick={() => setReloadTick((k) => k + 1)}
+        >
+          Повторить
+        </button>
+      </div>
+    )
   }
 
   const completionRate = data.overview.total > 0 ? Math.round((data.overview.complete / data.overview.total) * 100) : 0

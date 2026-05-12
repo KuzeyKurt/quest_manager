@@ -1,6 +1,56 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getSession } from "@/lib/auth"
-import { prisma } from "@/lib/prisma"
+import { ensureTaskDeadlineColumn, prisma } from "@/lib/prisma"
+
+const taskResponseSelect = {
+  id: true,
+  title: true,
+  description: true,
+  status: true,
+  priority: true,
+  deadline: true,
+  order: true,
+  createdAt: true,
+  updatedAt: true,
+  userId: true,
+  teamId: true,
+  assigneeId: true,
+  user: {
+    select: {
+      id: true,
+      name: true,
+      email: true,
+    },
+  },
+  assignee: {
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+    },
+  },
+}
+
+function isMissingTaskDeadlineColumn(error: any): boolean {
+  if (error?.code !== "P2022") {
+    return false
+  }
+
+  const column = String(error?.meta?.column ?? "").toLowerCase()
+  const message = String(error?.message ?? "").toLowerCase()
+
+  return (
+    column === "deadline" ||
+    column.endsWith(".deadline") ||
+    message.includes("`deadline` does not exist") ||
+    message.includes("column `deadline` does not exist") ||
+    message.includes("task.deadline")
+  )
+}
 
 async function hydrateTaskAssignee<T extends { assigneeId: string | null; teamId: string; assignee: any }>(task: T): Promise<T> {
   if (!task.assigneeId || task.assignee) {
@@ -32,6 +82,8 @@ async function hydrateTaskAssignee<T extends { assigneeId: string | null; teamId
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    await ensureTaskDeadlineColumn()
+
     const session = await getSession()
     if (!session) {
       return NextResponse.json({ error: "Пользователь не авторизован" }, { status: 401 })
@@ -82,36 +134,43 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       ...(body.description !== undefined ? { description: body.description } : {}),
       ...(body.priority !== undefined ? { priority: body.priority } : {}),
       ...(body.status !== undefined ? { status: body.status } : {}),
-    }
-
-    const include = {
-      user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-        },
-      },
-      assignee: {
-        include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
-          },
-        },
-      },
+      ...(body.deadline !== undefined
+        ? {
+            deadline:
+              body.deadline === null || body.deadline === ""
+                ? null
+                : typeof body.deadline === "string"
+                  ? (() => {
+                      const d = new Date(body.deadline)
+                      if (Number.isNaN(d.getTime())) {
+                        throw new Error("Invalid deadline")
+                      }
+                      return d
+                    })()
+                  : null,
+          }
+        : {}),
     }
 
     let task
     if (normalizedAssigneeIds === undefined) {
-      task = await prisma.task.update({
-        where: { id },
-        data,
-        include,
-      })
+      try {
+        task = await prisma.task.update({
+          where: { id },
+          data,
+          select: taskResponseSelect,
+        })
+      } catch (error: any) {
+        if (!isMissingTaskDeadlineColumn(error) || body.deadline === undefined) {
+          throw error
+        }
+        const { deadline: _deadline, ...dataWithoutDeadline } = data
+        task = await prisma.task.update({
+          where: { id },
+          data: dataWithoutDeadline,
+          select: taskResponseSelect,
+        })
+      }
     } else {
       let lastError: any = null
       for (const candidate of normalizedAssigneeIds) {
@@ -122,10 +181,31 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
               ...data,
               assigneeId: candidate,
             },
-            include,
+            select: taskResponseSelect,
           })
           break
         } catch (error: any) {
+          if (isMissingTaskDeadlineColumn(error) && body.deadline !== undefined) {
+            const { deadline: _deadline, ...dataWithoutDeadline } = data
+            try {
+              task = await prisma.task.update({
+                where: { id },
+                data: {
+                  ...dataWithoutDeadline,
+                  assigneeId: candidate,
+                },
+                select: taskResponseSelect,
+              })
+              break
+            } catch (fallbackError: any) {
+              if (fallbackError?.code !== "P2003") {
+                throw fallbackError
+              }
+              lastError = fallbackError
+              continue
+            }
+          }
+
           if (error?.code !== "P2003") {
             throw error
           }
@@ -141,7 +221,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
               ...data,
               assigneeId: null,
             },
-            include,
+            select: taskResponseSelect,
           })
         } else if (lastError) {
           throw lastError

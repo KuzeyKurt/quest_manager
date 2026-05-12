@@ -1,25 +1,20 @@
 import { redirect } from "next/navigation"
 import { getSession } from "@/lib/auth"
 import { isTransientPrismaConnectionError, prisma, withPrismaRetry } from "@/lib/prisma"
-import { DashboardClient } from "@/components/dashboard-client"
+import { SettingsPageClient } from "@/components/settings-page-client"
 
-export default async function DashboardPage() {
+export default async function SettingsPage() {
   const session = await getSession()
-
   if (!session) {
     redirect("/login")
   }
 
-  let user: { id: string; name: string; email: string } | null = null
+  let user: { id: string; email: string; name: string } | null = null
   try {
     user = await withPrismaRetry(() =>
       prisma.user.findUnique({
         where: { id: session.userId },
-        select: {
-          id: true,
-          name: true,
-          email: true,
-        },
+        select: { id: true, email: true, name: true },
       }),
     )
   } catch (error) {
@@ -32,5 +27,6 @@ export default async function DashboardPage() {
     redirect("/login")
   }
 
-  return <DashboardClient user={user} />
+  return <SettingsPageClient user={user} />
 }
+

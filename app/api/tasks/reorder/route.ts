@@ -22,6 +22,7 @@ export async function POST(request: NextRequest) {
         status: newStatus,
         order: newOrder,
       },
+      select: { id: true },
     })
 
     return NextResponse.json({ success: true })

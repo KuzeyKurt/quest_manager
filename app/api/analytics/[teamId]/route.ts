@@ -17,7 +17,12 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     // Отобразить все задачи из проекта
     const tasks = await prisma.task.findMany({
       where: { teamId },
-      include: {
+      select: {
+        id: true,
+        status: true,
+        priority: true,
+        createdAt: true,
+        updatedAt: true,
         user: {
           select: {
             id: true,

@@ -5,6 +5,7 @@ import type React from "react"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import { getSafeReturnToFromCurrentUrl } from "@/lib/redirect-login"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -26,6 +27,7 @@ export default function LoginPage() {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ email, password }),
       })
 
@@ -36,7 +38,7 @@ export default function LoginPage() {
         return
       }
 
-      router.push("/dashboard")
+      router.push(getSafeReturnToFromCurrentUrl())
       router.refresh()
     } catch (err) {
       setError("An error occurred. Please try again.")
