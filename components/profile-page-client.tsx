@@ -1,9 +1,8 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
-import { SidebarTrigger } from "@/components/ui/sidebar"
+import { useEffect, useRef, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { UserAvatar } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -11,7 +10,9 @@ import { Label } from "@/components/ui/label"
 type ProfileUser = {
   name: string
   email: string
+  avatarUrl: string | null
   createdAt: string
+  updatedAt: string
 }
 
 type ProfileStats = {
@@ -28,15 +29,9 @@ function formatDate(iso: string) {
   return d.toLocaleDateString()
 }
 
-function calcInitials(name: string) {
-  const cleaned = (name || "").trim()
-  if (!cleaned) return "?"
-  return cleaned
-    .split(/\s+/)
-    .map((p) => p[0] ?? "")
-    .join("")
-    .toUpperCase()
-    .slice(0, 2)
+function broadcastUserUpdate(user: unknown) {
+  if (typeof window === "undefined") return
+  window.dispatchEvent(new CustomEvent("qm-user-updated", { detail: user }))
 }
 
 export function ProfilePageClient({
@@ -47,19 +42,94 @@ export function ProfilePageClient({
   stats: ProfileStats
 }) {
   const [profile, setProfile] = useState<ProfileUser>(user)
-  const initials = useMemo(() => calcInitials(profile.name), [profile.name])
   const [activeDays, setActiveDays] = useState<number>(1)
   const [isEditing, setIsEditing] = useState(false)
   const [draftName, setDraftName] = useState(user.name)
   const [draftEmail, setDraftEmail] = useState(user.email)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string>("")
+  const [avatarBusy, setAvatarBusy] = useState(false)
+  const [avatarError, setAvatarError] = useState<string>("")
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     setProfile(user)
     setDraftName(user.name)
     setDraftEmail(user.email)
   }, [user])
+
+  const openAvatarPicker = () => {
+    setAvatarError("")
+    fileInputRef.current?.click()
+  }
+
+  const uploadAvatar = async (file: File) => {
+    setAvatarBusy(true)
+    setAvatarError("")
+    try {
+      const fd = new FormData()
+      fd.set("file", file)
+      const res = await fetch("/api/auth/me/avatar", {
+        method: "POST",
+        body: fd,
+        credentials: "include",
+      })
+      const payload = await res.json()
+      if (!res.ok) {
+        throw new Error(payload?.error || "Не удалось загрузить аватар")
+      }
+      if (!payload?.user) {
+        throw new Error("Сервер вернул некорректный ответ")
+      }
+      const u = payload.user
+      setProfile((prev) => ({
+        ...prev,
+        avatarUrl: u.avatarUrl ?? null,
+        updatedAt: u.updatedAt ? new Date(u.updatedAt).toISOString() : prev.updatedAt,
+      }))
+      broadcastUserUpdate(payload.user)
+    } catch (e: unknown) {
+      setAvatarError(e instanceof Error ? e.message : "Не удалось загрузить аватар")
+    } finally {
+      setAvatarBusy(false)
+    }
+  }
+
+  const onAvatarFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = ""
+    if (!file) return
+    await uploadAvatar(file)
+  }
+
+  const removeAvatar = async () => {
+    setAvatarBusy(true)
+    setAvatarError("")
+    try {
+      const res = await fetch("/api/auth/me/avatar", {
+        method: "DELETE",
+        credentials: "include",
+      })
+      const payload = await res.json()
+      if (!res.ok) {
+        throw new Error(payload?.error || "Не удалось удалить аватар")
+      }
+      if (!payload?.user) {
+        throw new Error("Сервер вернул некорректный ответ")
+      }
+      const u = payload.user
+      setProfile((prev) => ({
+        ...prev,
+        avatarUrl: u.avatarUrl ?? null,
+        updatedAt: u.updatedAt ? new Date(u.updatedAt).toISOString() : prev.updatedAt,
+      }))
+      broadcastUserUpdate(payload.user)
+    } catch (e: unknown) {
+      setAvatarError(e instanceof Error ? e.message : "Не удалось удалить аватар")
+    } finally {
+      setAvatarBusy(false)
+    }
+  }
 
   useEffect(() => {
     const key = "qm_active_since"
@@ -110,8 +180,13 @@ export function ProfilePageClient({
       setProfile({
         name: payload.user.name,
         email: payload.user.email,
+        avatarUrl: payload.user.avatarUrl ?? null,
         createdAt: payload.user.createdAt,
+        updatedAt: payload.user.updatedAt
+          ? new Date(payload.user.updatedAt).toISOString()
+          : profile.updatedAt,
       })
+      broadcastUserUpdate(payload.user)
       setIsEditing(false)
     } catch (e: any) {
       setError(e?.message || "Не удалось сохранить профиль")
@@ -129,14 +204,52 @@ export function ProfilePageClient({
       <main className="container mx-auto flex-1 px-4 py-8">
         <div className="space-y-6">
           <Card>
-            <CardContent className="flex w-full items-center gap-4 p-6">
-              <Avatar className="h-16 w-16">
-                <AvatarFallback className="bg-violet-600 text-lg font-semibold text-white">
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
+            <CardContent className="flex w-full flex-wrap items-start gap-4 p-6 sm:items-center">
+              <div className="flex shrink-0 flex-col items-center gap-2 sm:items-start">
+                <UserAvatar
+                  className="h-16 w-16"
+                  name={profile.name}
+                  imageUrl={profile.avatarUrl}
+                  imageCacheKey={profile.updatedAt}
+                  fallbackClassName="bg-violet-600 text-lg font-semibold"
+                />
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  className="sr-only"
+                  tabIndex={-1}
+                  onChange={onAvatarFileChange}
+                />
+                <div className="flex flex-wrap justify-center gap-2 sm:justify-start">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    disabled={avatarBusy || saving}
+                    onClick={openAvatarPicker}
+                  >
+                    {avatarBusy ? "Подождите..." : "Загрузить фото"}
+                  </Button>
+                  {profile.avatarUrl ? (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      className="text-muted-foreground"
+                      disabled={avatarBusy || saving}
+                      onClick={removeAvatar}
+                    >
+                      Удалить фото
+                    </Button>
+                  ) : null}
+                </div>
+                {avatarError ? (
+                  <p className="max-w-[220px] text-center text-xs text-destructive sm:text-left">{avatarError}</p>
+                ) : null}
+              </div>
 
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <div className="truncate text-2xl font-bold">{profile.name}</div>
                 <div className="mt-1 truncate text-sm text-muted-foreground">{profile.email}</div>
                 <div className="mt-1 text-sm text-muted-foreground">

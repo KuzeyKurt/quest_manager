@@ -15,7 +15,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { UserAvatar } from "@/components/ui/avatar"
 
 export function AppSidebar() {
   const { state, toggleSidebar } = useSidebar()
@@ -32,15 +32,28 @@ export function AppSidebar() {
       .catch(err => console.error("Failed to fetch user:", err))
   }, [])
 
+  useEffect(() => {
+    const onUserUpdated = (event: Event) => {
+      const detail = (event as CustomEvent<unknown>).detail
+      if (detail && typeof detail === "object") {
+        setUser(detail as Record<string, unknown>)
+      }
+    }
+    window.addEventListener("qm-user-updated", onUserUpdated)
+    return () => window.removeEventListener("qm-user-updated", onUserUpdated)
+  }, [])
+
   const rawName = user?.name || user?.username || "Diana Azamatova"
   const displayName = typeof rawName === "string" ? rawName.trim() : "Diana Azamatova"
 
-  const initials = displayName
-    .split(" ")
-    .map((n: string) => n[0] || "")
-    .join("")
-    .toUpperCase()
-    .slice(0, 2)
+  const avatarUrl =
+    typeof user?.avatarUrl === "string" && user.avatarUrl.length > 0 ? user.avatarUrl : null
+  const imageCacheKey =
+    user?.updatedAt != null
+      ? typeof user.updatedAt === "string"
+        ? user.updatedAt
+        : new Date(user.updatedAt as string | number | Date).toISOString()
+      : null
 
   return (
     <Sidebar collapsible="icon" variant="inset">
@@ -108,11 +121,13 @@ export function AppSidebar() {
           {state !== "collapsed" && (
             <div className="flex items-center justify-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors"
             onClick={() => window.location.href = '/profile'} >
-              <Avatar className="h-11 w-11 shrink-0">
-                <AvatarFallback className="bg-violet-600 text-base font-semibold">
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
+              <UserAvatar
+                className="h-11 w-11 shrink-0"
+                name={displayName}
+                imageUrl={avatarUrl}
+                imageCacheKey={imageCacheKey}
+                fallbackClassName="bg-violet-600 text-base font-semibold"
+              />
 
               <div className="flex flex-col min-w-0">
                 <p className="font-medium text-sm truncate">{displayName}</p>

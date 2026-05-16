@@ -6,7 +6,13 @@ import { ProfilePageClient } from "@/components/profile-page-client"
 export default async function ProfilePage() {
   const userId = await getSessionUserId()
 
-  let user: { id: string; name: string; email: string; createdAt: Date } | null = null
+  let user: {
+    id: string
+    name: string
+    email: string
+    avatarUrl: string | null
+    createdAt: Date
+  } | null = null
   try {
     user = await withPrismaRetry(() =>
       prisma.user.findUnique({
@@ -15,7 +21,9 @@ export default async function ProfilePage() {
           id: true,
           name: true,
           email: true,
+          avatarUrl: true,
           createdAt: true,
+          updatedAt: true,
         },
       }),
     )
@@ -63,7 +71,9 @@ export default async function ProfilePage() {
       user={{
         name: user.name,
         email: user.email,
+        avatarUrl: user.avatarUrl,
         createdAt: user.createdAt.toISOString(),
+        updatedAt: user.updatedAt.toISOString(),
       }}
       stats={{
         projectsCount,

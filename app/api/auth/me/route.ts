@@ -16,7 +16,9 @@ export async function GET() {
         id: true,
         email: true,
         name: true,
+        avatarUrl: true,
         createdAt: true,
+        updatedAt: true,
       },
     })
 
@@ -62,7 +64,9 @@ export async function PATCH(request: Request) {
         id: true,
         email: true,
         name: true,
+        avatarUrl: true,
         createdAt: true,
+        updatedAt: true,
       },
     })
 
